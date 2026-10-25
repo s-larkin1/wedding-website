@@ -99,8 +99,8 @@ export default function WeddingApp() {
   const initYouTubePlayer = () => {
     if (playerRef.current) return;
     playerRef.current = new window.YT.Player('yt-hidden-player', {
-      height: '0',
-      width: '0',
+      height: '1',
+      width: '1',
       playerVars: {
         autoplay: 1,
         controls: 0,
@@ -110,15 +110,12 @@ export default function WeddingApp() {
           setIsPlayerReady(true);
         },
         onStateChange: (event: any) => {
-          // YT.PlayerState.ENDED === 0
           if (event.data === 0) {
             handleSongEnded();
           }
-          // YT.PlayerState.PLAYING === 1
           if (event.data === 1) {
             setIsPlaying(true);
           }
-          // YT.PlayerState.PAUSED === 2
           if (event.data === 2) {
             setIsPlaying(false);
           }
@@ -387,8 +384,19 @@ export default function WeddingApp() {
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* HIDDEN YOUTUBE SDK IFRAME CONTAINER */}
-      <div id="yt-hidden-player" className="hidden" />
+      {/* UNTHROTTLED UNCLIPPED YOUTUBE IFRAME CONTAINER */}
+      <div 
+        id="yt-hidden-player" 
+        style={{ 
+          position: 'fixed', 
+          top: '-9999px', 
+          left: '-9999px', 
+          width: '1px', 
+          height: '1px', 
+          opacity: 0.01, 
+          pointerEvents: 'none' 
+        }} 
+      />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
       <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
