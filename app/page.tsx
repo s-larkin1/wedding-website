@@ -38,7 +38,7 @@ export default function WeddingApp() {
   // Info Section Tab State ('travel' | 'activities' | 'faq' | 'map')
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
 
-  // Audio Element Reference (Guarantees direct DOM control)
+  // Audio Element Reference
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Refs for auto-play sequence state management
@@ -352,7 +352,7 @@ export default function WeddingApp() {
       />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
-      <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm">
+      <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
         <div className="text-[10px] font-bold text-pink-400 uppercase tracking-widest border-b border-gray-800 pb-1 mb-1">
           ⏳ CEREMONY COUNTDOWN
         </div>
@@ -380,7 +380,7 @@ export default function WeddingApp() {
       </div>
 
       {/* TOP-RIGHT ADMIN PANEL TRIGGER WIDGET */}
-      <div className="fixed top-2 right-2 z-50">
+      <div className="fixed top-2 right-2 z-50 pointer-events-auto">
         <button
           type="button"
           onClick={() => setIsAdminOpen(!isAdminOpen)}
@@ -391,13 +391,13 @@ export default function WeddingApp() {
 
         {/* ADMIN MODAL CONTAINER */}
         {isAdminOpen && (
-          <div className="mt-2 w-80 md:w-96 bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs">
+          <div className="mt-2 w-80 md:w-96 bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs pointer-events-auto">
             <div className="bg-gradient-to-r from-pink-900 to-purple-900 text-white p-2 font-bold mb-3 flex justify-between items-center border border-pink-500">
               <span>ADMIN DASHBOARD</span>
               {isAdminAuthenticated && (
                 <button 
                   onClick={() => setIsAdminAuthenticated(false)}
-                  className="text-[10px] bg-red-800 hover:bg-red-700 px-1.5 py-0.5 border border-red-500"
+                  className="text-[10px] bg-red-800 hover:bg-red-700 px-1.5 py-0.5 border border-red-500 cursor-pointer"
                 >
                   Logout
                 </button>
@@ -514,7 +514,7 @@ export default function WeddingApp() {
       {/* PAGE 1: SPLASH SCREEN */}
       {!hasRSVPd ? (
         <div 
-          className="relative h-screen w-full flex flex-col justify-end items-center bg-cover bg-center pb-12"
+          className="relative h-screen w-full flex flex-col justify-end items-center bg-cover bg-center pb-12 pointer-events-auto"
           style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.85), transparent), url('/saolaurenco.jpg')` }}
         >
           <div className="bg-gray-200 border-2 border-gray-400 p-6 max-w-lg w-full mx-4 shadow-2xl text-black">
@@ -589,7 +589,8 @@ export default function WeddingApp() {
 
         /* PAGE 2: MAIN HUB WITH SLIDESHOW & FLOATING MUSIC PLAYER BAR */
         <>
-          <div className="fixed inset-0 z-0">
+          {/* BACKGROUND SLIDESHOW WITH POINTER-EVENTS-NONE SO CLICKS PASS THROUGH TO PAGE */}
+          <div className="fixed inset-0 z-0 pointer-events-none">
             {slideshowImages.map((img, index) => (
               <div
                 key={img}
@@ -603,7 +604,7 @@ export default function WeddingApp() {
             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px]" />
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto p-4 md:p-6 pb-64 text-gray-200">
+          <div className="relative z-10 max-w-6xl mx-auto p-4 md:p-6 pb-64 text-gray-200 pointer-events-auto">
             <header className="border-2 border-pink-500 bg-black/80 p-6 mb-6 text-center shadow-lg">
               <h1 className="text-3xl font-bold text-pink-400 tracking-wider">Welcome to Our Wedding Page</h1>
               <p className="text-gray-300 mt-1.5 text-sm">August 4th, 2027 in beautiful São Lourenço Bay, Santa Maria, Azores</p>
@@ -755,14 +756,14 @@ export default function WeddingApp() {
             </main>
           </div>
 
-          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 p-3 md:p-4 shadow-2xl backdrop-blur-md">
+          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR WITH EXPLICIT POINTER-EVENTS-AUTO */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 p-3 md:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
               <div className="flex items-center gap-3 w-full md:w-auto text-left">
                 <button
                   type="button"
                   onClick={togglePlayPause}
-                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold p-3 border border-pink-500 cursor-pointer shrink-0 min-w-[50px] text-center text-sm"
+                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold p-3 border border-pink-500 cursor-pointer shrink-0 min-w-[50px] text-center text-sm pointer-events-auto"
                 >
                   {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
                 </button>
@@ -780,7 +781,7 @@ export default function WeddingApp() {
                 <button
                   type="button"
                   onClick={handleShuffleClick}
-                  className={`px-3 py-1.5 font-bold border text-xs cursor-pointer transition-colors ${
+                  className={`px-3 py-1.5 font-bold border text-xs cursor-pointer transition-colors pointer-events-auto ${
                     isShuffle 
                       ? 'bg-pink-900/80 border-pink-500 text-pink-300' 
                       : 'bg-gray-900 border-gray-700 text-gray-500 hover:text-gray-300'
@@ -791,7 +792,7 @@ export default function WeddingApp() {
                 <button
                   type="button"
                   onClick={handleSongEnded}
-                  className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 font-bold text-xs cursor-pointer"
+                  className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 font-bold text-xs cursor-pointer pointer-events-auto"
                 >
                   NEXT ⏭
                 </button>
