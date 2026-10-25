@@ -129,11 +129,12 @@ export default function WeddingApp() {
     }
   }, [hasRSVPd, slideshowImages.length]);
 
-  // Load audio source with fallback stream to guarantee sound output
+  // Dynamically fetch and play the requested song via YouTube search and Piped streaming
   const playSongAudio = async (song: any) => {
     if (!song || !audioRef.current) return;
     
-    if (audioRef.current.dataset.songId === String(song.id)) {
+    // If this exact song is already loaded in the audio element, don't re-fetch
+    if (audioRef.current.dataset.songId === String(song.id) && audioRef.current.src) {
       audioRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.log(e));
       return;
     }
@@ -145,24 +146,18 @@ export default function WeddingApp() {
       
       if (data.videoId) {
         audioRef.current.src = `https://pipedapi.kavin.rocks/streams/${data.videoId}`;
+        audioRef.current.dataset.songId = String(song.id);
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch((err) => {
+          console.error('Playback restricted:', err);
+          setIsPlaying(false);
+        });
       } else {
-        // Fallback working sample audio if search fails
-        audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+        console.error('No videoId found for query:', query);
       }
-      
-      audioRef.current.dataset.songId = String(song.id);
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((err) => {
-        console.error('Audio playback blocked:', err);
-        setIsPlaying(false);
-      });
     } catch (err) {
-      console.error('Failed to load audio track, using fallback:', err);
-      if (audioRef.current) {
-        audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
-      }
+      console.error('Failed to fetch song stream:', err);
     }
   };
 
@@ -320,7 +315,7 @@ export default function WeddingApp() {
     }
     try {
       const newSong = { song_title: songTitle, artist, requested_by: guestName || 'Guest' };
-      const { data, error } = await supabase.from('song_requests').insert([newSong]).select();
+      const { data, error } = await supabase.from('song_requests'].insert([newSong]).select();
 
       if (!error) {
         setSongTitle('');
@@ -335,7 +330,7 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state with direct user interaction handling
+  // Toggle Play / Pause state via Audio Ref
   const togglePlayPause = async () => {
     if (!audioRef.current) return;
 
@@ -349,9 +344,6 @@ export default function WeddingApp() {
         setIsPlaying(true);
       }).catch((err) => {
         console.error('Play prevented:', err);
-        // Fallback direct play
-        audioRef.current!.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-        audioRef.current!.play().then(() => setIsPlaying(true)).catch(console.error);
       });
     } else {
       audioRef.current.pause();
