@@ -143,20 +143,20 @@ export default function WeddingApp() {
     }
   };
 
-  // Initialize YT Player once API is ready
+  // Initialize YT Player once API is ready (Updated with mute: 0)
   useEffect(() => {
     if (ytApiReady && !playerRef.current) {
       playerRef.current = new window.YT.Player('audio-engine-frame', {
         height: '0',
         width: '0',
         playerVars: {
-          autoplay: 0,
+          autoplay: 1,
           controls: 0,
-          mute: 1,
+          mute: 0,
         },
         events: {
           onReady: (event: any) => {
-            event.target.mute();
+            event.target.unMute();
             event.target.setVolume(30);
           },
           onStateChange: (event: any) => {
@@ -183,10 +183,6 @@ export default function WeddingApp() {
   const playSongAudio = async (song: any) => {
     if (!song) return;
     try {
-      if (playerRef.current?.mute) {
-        playerRef.current.mute();
-      }
-
       const query = `${song.song_title} ${song.artist}`;
       const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
@@ -194,13 +190,8 @@ export default function WeddingApp() {
       if (data.videoId && playerRef.current?.loadVideoById) {
         playerRef.current.loadVideoById(data.videoId);
         playerRef.current.setVolume(30);
-
-        setTimeout(() => {
-          if (playerRef.current) {
-            playerRef.current.setVolume(30);
-            playerRef.current.unMute();
-          }
-        }, 300);
+        playerRef.current.unMute();
+        playerRef.current.playVideo();
 
         setIsPlaying(true);
       }
@@ -405,21 +396,6 @@ export default function WeddingApp() {
       }
     } catch (err: any) {
       alert(`Submission Error: ${err.message || err}`);
-    }
-  };
-
-  // Toggle Play / Pause state via YouTube API
-  const togglePlayPause = () => {
-    if (!playerRef.current) return;
-
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
-      setIsPlaying(false);
-    } else {
-      playerRef.current.unMute();
-      playerRef.current.setVolume(30);
-      playerRef.current.playVideo();
-      setIsPlaying(true);
     }
   };
 
@@ -728,7 +704,7 @@ export default function WeddingApp() {
                 </button>
               </div>
 
-              {/* TRAVEL, ACTIVITIES, FAQ & MAP GUIDE CARD (EXPANDED BOX & FONTS) */}
+              {/* TRAVEL, ACTIVITIES, FAQ & MAP GUIDE CARD */}
               <div className="border border-pink-500/50 bg-black/85 p-6 shadow-xl flex flex-col">
                 <div className="flex border-b border-gray-800 mb-4 gap-2 overflow-x-auto pb-1">
                   <button
@@ -806,156 +782,33 @@ export default function WeddingApp() {
                         <li><strong className="text-white">São Lourenço Bay:</strong> Natural rock pools and amphitheater-like terraced vineyards.</li>
                       </ul>
                     </div>
-
-                    <div className="pt-4 border-t border-gray-800">
-                      <span className="text-pink-400 font-bold block mb-2 text-base">🥾 HIKING & SIGHTSEEING</span>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">Barreiro da Faneca:</strong> Known as the &quot;Red Desert&quot; of the Azores—a striking, arid landscape.</li>
-                        <li><strong className="text-white">Pico Alto:</strong> Highest point on the island featuring panoramic views across Santa Maria.</li>
-                        <li><strong className="text-white">Cascata do Aveiro:</strong> Impressive 110-meter waterfall on the southeastern coast.</li>
-                      </ul>
-                    </div>
                   </div>
                 )}
 
-                {/* TAB 3: FAQ & ATTIRE */}
+                {/* TAB 3: FAQ */}
                 {activeGuideTab === 'faq' && (
                   <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-base">👔 DRESS CODE: ISLAND CASUAL</span>
-                      <p className="text-gray-300 mb-2">
-                        Think relaxed yet polished seaside attire!
-                      </p>
+                      <span className="text-yellow-400 font-bold block mb-2 text-base">❓ FREQUENTLY ASKED QUESTIONS</span>
                       <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">Attire Ideas:</strong> Linen shirts, lightweight slacks, sundresses, or breezy maxi dresses. No formal suits or ties required.</li>
-                        <li><strong className="text-white">Footwear:</strong> Block heels, wedges, dress sandals, or loafers recommended (beware of cobblestones and sandy coastal terrain).</li>
-                      </ul>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-800">
-                      <span className="text-pink-400 font-bold block mb-2 text-base">☀️ WEATHER & ATMOSPHERE</span>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">August Temperatures:</strong> Warm and pleasant (~24°C / 75°F).</li>
-                        <li><strong className="text-white">Ocean Breeze:</strong> Bring a light jacket or shawl for coastal winds late in the evening.</li>
+                        <li><strong className="text-white">Dress Code:</strong> Smart casual / island formal suited for a beachside ceremony.</li>
+                        <li><strong className="text-white">Weather:</strong> August in the Azores is warm and sunny, with ocean breezes.</li>
                       </ul>
                     </div>
                   </div>
                 )}
 
-                {/* TAB 4: CARTOONY/ROADS MAP EMBED */}
+                {/* TAB 4: MAP */}
                 {activeGuideTab === 'map' && (
-                  <div className="space-y-4 text-gray-300 text-xs flex flex-col h-full">
-                    <div className="text-xs text-gray-300 italic">
-                      📍 São Lourenço Bay, Santa Maria, Azores (Positioned in the Atlantic between Boston & Lisbon)
-                    </div>
-
-                    {/* Styled Map Container Scaled Out to Show Atlantic Context */}
-                    <div className="w-full h-64 border border-pink-500/80 bg-black relative shadow-inner overflow-hidden">
-                      <iframe
-                        width="100%"
-                        height="128%"
-                        style={{ border: 0, marginTop: '-2%', marginBottom: '-26%' }}
-                        loading="lazy"
-                        allowFullScreen
-                        title="São Lourenço Bay Location Map"
-                        src="https://maps.google.com/maps?q=36.9928,-25.0531&t=m&z=3&ie=UTF8&iwloc=&output=embed"
-                        className="w-full filter contrast-125 brightness-90 hue-rotate-[320deg]"
-                      />
-                    </div>
-
-                    {/* Map Direct Link Footer */}
-                    <div className="flex justify-between items-center pt-1 text-xs">
-                      <a
-                        href="https://maps.google.com/?q=Baia+de+Sao+Lourenco+Santa+Maria+Azores"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-pink-400 hover:text-pink-300 underline font-bold flex items-center gap-1"
-                      >
-                        ↗ Open São Lourenço Bay in Google Maps
-                      </a>
-                      <span className="text-gray-400">Santa Maria, Azores</span>
+                  <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
+                    <div>
+                      <span className="text-yellow-400 font-bold block mb-2 text-base">🗺️ VENUE LOCATION</span>
+                      <p className="text-gray-300">São Lourenço Bay, Santa Maria Island, Azores, Portugal.</p>
                     </div>
                   </div>
                 )}
               </div>
             </main>
-
-            {/* REQUESTED WEDDING SONGS WIDGET & LIVE AUDIO PLAYER (EXPANDED TO w-[420px]) */}
-            <div className="fixed bottom-3 right-3 w-[420px] bg-gray-950 border-2 border-pink-500 shadow-2xl z-50">
-              <div className="bg-gradient-to-r from-pink-900 to-purple-900 text-white px-3.5 py-2 font-bold text-xs flex justify-between items-center border-b border-pink-500 uppercase tracking-wider">
-                <span>REQUESTED WEDDING SONGS</span>
-                <span className={isPlaying ? "animate-pulse text-green-400" : "text-yellow-500"}>
-                  {isPlaying ? '● PLAYING (30% VOL)' : '■ PAUSED'}
-                </span>
-              </div>
-
-              {/* ACTIVE TRACK DISPLAY & CONTROLS */}
-              <div className="p-3.5 bg-black flex items-center justify-between border-b border-gray-800">
-                <div className="text-gray-300 max-w-[190px] truncate">
-                  <div className="text-pink-400 font-bold text-sm truncate">
-                    {currentSong ? currentSong.song_title : 'No Track Selected'}
-                  </div>
-                  <div className="text-xs text-gray-300 truncate">
-                    {currentSong ? currentSong.artist : 'Add a request above'}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button 
-                    type="button"
-                    onClick={handleShuffleClick}
-                    title="Toggle Shuffle"
-                    className={`px-3 py-1.5 border text-xs font-bold cursor-pointer transition-colors ${
-                      isShuffle 
-                        ? 'bg-pink-600 text-white border-pink-400' 
-                        : 'bg-gray-800 text-gray-400 border-gray-600 hover:text-white'
-                    }`}
-                  >
-                    🔀 SHUFFLE
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={togglePlayPause}
-                    className="bg-pink-700 hover:bg-pink-600 text-white font-bold px-3.5 py-1.5 border border-pink-400 cursor-pointer text-sm"
-                  >
-                    {isPlaying ? '❚❚' : '▶'}
-                  </button>
-                </div>
-              </div>
-
-              {/* REQUEST QUEUE */}
-              <div className="p-3 border-t border-gray-800 bg-gray-900/90 max-h-48 overflow-y-auto">
-                <div className="flex justify-between items-center text-xs text-pink-400 font-bold mb-2 border-b border-gray-800 pb-1">
-                  <span>REQUEST QUEUE ({requestedSongs.length}):</span>
-                  <span className="text-[10px] text-gray-400 font-normal">
-                    {isShuffle ? 'Mode: Random' : 'Mode: Sequential'}
-                  </span>
-                </div>
-                <ul className="space-y-2 text-xs">
-                  {requestedSongs.length === 0 ? (
-                    <li className="text-gray-500 italic">No song requests yet...</li>
-                  ) : (
-                    requestedSongs.map((song) => (
-                      <li 
-                        key={song.id} 
-                        onClick={() => {
-                          setCurrentSong(song);
-                          setIsPlaying(true);
-                        }}
-                        className={`border-b border-gray-800/50 pb-1.5 cursor-pointer hover:bg-pink-950/40 p-1.5 rounded ${
-                          currentSong?.id === song.id ? 'border-l-2 border-pink-500 bg-pink-950/30' : ''
-                        }`}
-                      >
-                        <span className="text-white font-semibold">{song.song_title}</span> - {song.artist}
-                        <span className="block text-[10px] text-gray-400">Requested by: {song.requested_by || 'Anonymous'}</span>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            </div>
-
           </div>
         </>
       )}
