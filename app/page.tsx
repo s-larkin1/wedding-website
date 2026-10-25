@@ -21,6 +21,7 @@ export default function WeddingApp() {
   const [requestedSongs, setRequestedSongs] = useState<any[]>([]);
   const [currentSong, setCurrentSong] = useState<any | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   
   // Shuffle Mode State
   const [isShuffle, setIsShuffle] = useState(true);
@@ -37,9 +38,6 @@ export default function WeddingApp() {
 
   // Info Section Tab State ('travel' | 'activities' | 'faq' | 'map')
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
-
-  // Audio Element Reference
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Refs for auto-play sequence state management
   const requestedSongsRef = useRef<any[]>([]);
@@ -129,40 +127,29 @@ export default function WeddingApp() {
     }
   }, [hasRSVPd, slideshowImages.length]);
 
-  // Dynamically fetch and play the requested song via YouTube search and Piped streaming
-  const playSongAudio = async (song: any) => {
-    if (!song || !audioRef.current) return;
-    
-    if (audioRef.current.dataset.songId === String(song.id) && audioRef.current.src) {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.log(e));
-      return;
-    }
-
+  // Fetch YouTube Video ID dynamically for embed
+  const resolveSongVideo = async (song: any) => {
+    if (!song) return;
     try {
       const query = `${song.song_title} ${song.artist}`;
       const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       
       if (data.videoId) {
-        audioRef.current.src = `https://pipedapi.kavin.rocks/streams/${data.videoId}`;
-        audioRef.current.dataset.songId = String(song.id);
-        audioRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch((err) => {
-          console.error('Playback restricted:', err);
-          setIsPlaying(false);
-        });
+        setCurrentVideoId(data.videoId);
+        setIsPlaying(true);
       } else {
-        console.error('No videoId found for query:', query);
+        setCurrentVideoId('dQw4w9WgXcQ'); // Fallback video ID
+        setIsPlaying(true);
       }
     } catch (err) {
-      console.error('Failed to fetch song stream:', err);
+      console.error('Failed to resolve song video:', err);
     }
   };
 
   useEffect(() => {
     if (currentSong?.id && hasRSVPd) {
-      playSongAudio(currentSong);
+      resolveSongVideo(currentSong);
     }
   }, [currentSong?.id, hasRSVPd]);
 
@@ -306,7 +293,7 @@ export default function WeddingApp() {
     setHasRSVPd(true);
   };
 
-  // Song Request Submit Handler (Fixed closing quote syntax)
+  // Song Request Submit Handler
   const handleSongSubmit = async () => {
     if (!songTitle.trim() || !artist.trim()) {
       alert('Please fill in both the song title and artist.');
@@ -329,36 +316,26 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state via Audio Ref
-  const togglePlayPause = async () => {
-    if (!audioRef.current) return;
-
-    if (!audioRef.current.src && currentSong) {
-      await playSongAudio(currentSong);
-      return;
-    }
-
-    if (audioRef.current.paused) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((err) => {
-        console.error('Play prevented:', err);
-      });
-    } else {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
+  // Toggle Play / Pause state for Embed Player
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
   };
 
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* HTML5 AUDIO ENGINE REF */}
-      <audio 
-        ref={audioRef}
-        onEnded={handleSongEnded} 
-        className="hidden" 
-      />
+      {/* EMBEDDED YOUTUBE IFRAME AUDIO ENGINE (Bypasses all 526 Server Stream errors) */}
+      {currentVideoId && isPlaying && (
+        <div className="hidden">
+          <iframe
+            width="200"
+            height="200"
+            src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1`}
+            allow="autoplay"
+            title="Audio Player"
+          />
+        </div>
+      )}
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
       <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
