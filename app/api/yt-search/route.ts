@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-// @ts-ignore
-import ytSearch from 'yt-search';
 
 export async function GET(request: Request) {
   try {
@@ -11,6 +9,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ videoId: null });
     }
 
+    // Dynamically import yt-search inside the try block to prevent top-level crashes
+    // @ts-ignore
+    const ytSearch = (await import('yt-search')).default;
     const r = await ytSearch(q);
 
     if (r && r.videos && r.videos.length > 0) {
