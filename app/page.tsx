@@ -80,7 +80,7 @@ export default function WeddingApp() {
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Countdown Timer Effect (Target: Aug 4, 2027 18:00 Azores Time / UTC-0)
+  // Countdown Timer Effect
   useEffect(() => {
     const targetDate = new Date('2027-08-04T18:00:00Z').getTime();
 
@@ -143,12 +143,12 @@ export default function WeddingApp() {
     }
   };
 
-  // Initialize YT Player once API is ready
+  // Initialize YT Player (Rendered with small dimensions so browser allows audio streaming)
   useEffect(() => {
     if (ytApiReady && !playerRef.current) {
       playerRef.current = new window.YT.Player('audio-engine-frame', {
-        height: '0',
-        width: '0',
+        height: '100',
+        width: '100',
         playerVars: {
           autoplay: 1,
           controls: 0,
@@ -156,8 +156,8 @@ export default function WeddingApp() {
         },
         events: {
           onReady: (event: any) => {
-            event.target.unMute();
-            event.target.setVolume(30);
+            if (event.target.unMute) event.target.unMute();
+            if (event.target.setVolume) event.target.setVolume(100);
           },
           onStateChange: (event: any) => {
             if (event.data === 0) {
@@ -189,9 +189,9 @@ export default function WeddingApp() {
       
       if (data.videoId && playerRef.current?.loadVideoById) {
         playerRef.current.loadVideoById(data.videoId);
-        playerRef.current.setVolume(30);
-        playerRef.current.unMute();
-        playerRef.current.playVideo();
+        if (playerRef.current.unMute) playerRef.current.unMute();
+        if (playerRef.current.setVolume) playerRef.current.setVolume(100);
+        if (playerRef.current.playVideo) playerRef.current.playVideo();
 
         setIsPlaying(true);
       }
@@ -206,7 +206,7 @@ export default function WeddingApp() {
     }
   }, [currentSong, ytApiReady]);
 
-  // Fetch song requests from Supabase with random initial track selection
+  // Fetch song requests from Supabase
   const fetchSongs = async () => {
     try {
       const { data, error } = await supabase
@@ -218,7 +218,6 @@ export default function WeddingApp() {
         console.error('Error fetching songs:', error);
       } else if (data && data.length > 0) {
         setRequestedSongs(data);
-        
         if (!currentSong) {
           const randomIndex = Math.floor(Math.random() * data.length);
           setCurrentSong(data[randomIndex]);
@@ -278,16 +277,10 @@ export default function WeddingApp() {
   // Delete RSVP Handler
   const handleDeleteRSVP = async (id: number) => {
     if (!confirm('Are you sure you want to delete this RSVP?')) return;
-    
     try {
-      const { error } = await supabase
-        .from('rsvps')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('rsvps').delete().eq('id', id);
       if (error) {
-        alert(`Delete failed: ${error.message}. Check Supabase RLS policies.`);
-        console.error('Delete RSVP Error:', error);
+        alert(`Delete failed: ${error.message}`);
       } else {
         setRsvpsList((prev) => prev.filter((item) => item.id !== id));
         await fetchRSVPs();
@@ -300,21 +293,13 @@ export default function WeddingApp() {
   // Delete Song Handler
   const handleDeleteSong = async (id: number) => {
     if (!confirm('Are you sure you want to remove this song request?')) return;
-    
     try {
-      const { error } = await supabase
-        .from('song_requests')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('song_requests').delete().eq('id', id);
       if (error) {
-        alert(`Delete failed: ${error.message}. Check Supabase RLS policies.`);
-        console.error('Delete Song Error:', error);
+        alert(`Delete failed: ${error.message}`);
       } else {
         setRequestedSongs((prev) => prev.filter((song) => song.id !== id));
-        if (currentSong?.id === id) {
-          setCurrentSong(null);
-        }
+        if (currentSong?.id === id) setCurrentSong(null);
         await fetchSongs();
       }
     } catch (err: any) {
@@ -322,7 +307,7 @@ export default function WeddingApp() {
     }
   };
 
-  // Manual Shuffle Toggle Trigger
+  // Manual Shuffle Toggle
   const handleShuffleClick = () => {
     setIsShuffle(!isShuffle);
     if (!isShuffle && requestedSongs.length > 1) {
@@ -338,26 +323,18 @@ export default function WeddingApp() {
       alert('Please enter your guest name(s).');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const { data, error } = await supabase
         .from('rsvps')
         .insert([{ guest_names: guestName, status: rsvpStatus, notes: rsvpNotes }])
         .select();
 
-      if (error) {
-        console.error('RSVP Insert Error:', error);
-        alert(`RSVP Error: ${error.message}`);
-      } else {
-        if (data && data.length > 0) {
-          setRsvpsList((prev) => [data[0], ...prev]);
-        }
+      if (!error && data && data.length > 0) {
+        setRsvpsList((prev) => [data[0], ...prev]);
       }
     } catch (err: any) {
       console.error('RSVP Exception:', err);
-      alert(`RSVP Exception: ${err.message || err}`);
     } finally {
       setIsSubmitting(false);
       setHasRSVPd(true);
@@ -375,21 +352,14 @@ export default function WeddingApp() {
       alert('Please fill in both the song title and artist.');
       return;
     }
-
     try {
       const newSong = { song_title: songTitle, artist, requested_by: guestName || 'Guest' };
-      const { data, error } = await supabase
-        .from('song_requests')
-        .insert([newSong])
-        .select();
+      const { data, error } = await supabase.from('song_requests').insert([newSong]).select();
 
-      if (error) {
-        alert(`Song Request Error: ${error.message}`);
-      } else {
+      if (!error) {
         setSongTitle('');
         setArtist('');
         await fetchSongs();
-        
         if (data && data[0]) {
           setCurrentSong(data[0]);
         }
@@ -399,17 +369,20 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state via YouTube API
-  const togglePlayPause = () => {
+  // Toggle Play / Pause state directly triggering player
+  const togglePlayPause = async () => {
     if (!playerRef.current) return;
 
     if (isPlaying) {
-      playerRef.current.pauseVideo();
+      if (playerRef.current.pauseVideo) playerRef.current.pauseVideo();
       setIsPlaying(false);
     } else {
-      playerRef.current.unMute();
-      playerRef.current.setVolume(30);
-      playerRef.current.playVideo();
+      if (currentSong) {
+        await playSongAudio(currentSong);
+      }
+      if (playerRef.current.unMute) playerRef.current.unMute();
+      if (playerRef.current.setVolume) playerRef.current.setVolume(100);
+      if (playerRef.current.playVideo) playerRef.current.playVideo();
       setIsPlaying(true);
     }
   };
@@ -417,8 +390,8 @@ export default function WeddingApp() {
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* HIDDEN YOUTUBE AUDIO ENGINE */}
-      <div className="hidden">
+      {/* ACTIVE YOUTUBE IFRAME CONTAINER (POSITIONED SO BROWSER ALLOWS AUDIO STREAMING) */}
+      <div style={{ position: 'fixed', bottom: 0, right: 0, width: '100px', height: '100px', zIndex: 1, opacity: 0.01, pointerEvents: 'none' }}>
         <div id="audio-engine-frame" />
       </div>
 
