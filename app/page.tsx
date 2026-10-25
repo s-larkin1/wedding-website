@@ -133,7 +133,6 @@ export default function WeddingApp() {
   const playSongAudio = async (song: any) => {
     if (!song || !audioRef.current) return;
     
-    // If this exact song is already loaded in the audio element, don't re-fetch
     if (audioRef.current.dataset.songId === String(song.id) && audioRef.current.src) {
       audioRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.log(e));
       return;
@@ -307,7 +306,7 @@ export default function WeddingApp() {
     setHasRSVPd(true);
   };
 
-  // Song Request Submit Handler
+  // Song Request Submit Handler (Fixed closing quote syntax)
   const handleSongSubmit = async () => {
     if (!songTitle.trim() || !artist.trim()) {
       alert('Please fill in both the song title and artist.');
@@ -315,7 +314,7 @@ export default function WeddingApp() {
     }
     try {
       const newSong = { song_title: songTitle, artist, requested_by: guestName || 'Guest' };
-      const { data, error } = await supabase.from('song_requests'].insert([newSong]).select();
+      const { data, error } = await supabase.from('song_requests').insert([newSong]).select();
 
       if (!error) {
         setSongTitle('');
