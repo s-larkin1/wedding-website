@@ -8,13 +8,6 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibm9jenpzd2p0enFua2tyaW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNTY4NjcsImV4cCI6MjEwMjczMjg2N30.L7zlOp0jkOqGYTHb_c8P_AvGO6B0H5pr6AVHwDHTYvc'
 );
 
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: any;
-  }
-}
-
 export default function WeddingApp() {
   const [hasRSVPd, setHasRSVPd] = useState(false);
   const [guestName, setGuestName] = useState('');
@@ -27,6 +20,7 @@ export default function WeddingApp() {
   const [artist, setArtist] = useState('');
   const [requestedSongs, setRequestedSongs] = useState<any[]>([]);
   const [currentSong, setCurrentSong] = useState<any | null>(null);
+  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
   // Shuffle Mode State
@@ -42,14 +36,10 @@ export default function WeddingApp() {
   // Countdown Timer State
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Info Section Tab State ('travel' | 'activities' | 'faq' | 'map')
+  // Info Section Tab State
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
 
-  // YouTube Iframe Player Reference & State
-  const playerRef = useRef<any>(null);
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
-
-  // Refs for auto-play sequence state management
+  // Refs for state management in callbacks
   const requestedSongsRef = useRef<any[]>([]);
   const currentSongRef = useRef<any | null>(null);
   const isShuffleRef = useRef<boolean>(true);
@@ -79,50 +69,6 @@ export default function WeddingApp() {
     '/photo8.jpg',
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // Load YouTube Iframe API Script
-  useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-      window.onYouTubeIframeAPIReady = () => {
-        initYouTubePlayer();
-      };
-    } else {
-      initYouTubePlayer();
-    }
-  }, []);
-
-  const initYouTubePlayer = () => {
-    if (playerRef.current) return;
-    playerRef.current = new window.YT.Player('yt-hidden-player', {
-      height: '1',
-      width: '1',
-      playerVars: {
-        autoplay: 1,
-        controls: 0,
-      },
-      events: {
-        onReady: () => {
-          setIsPlayerReady(true);
-        },
-        onStateChange: (event: any) => {
-          if (event.data === 0) {
-            handleSongEnded();
-          }
-          if (event.data === 1) {
-            setIsPlaying(true);
-          }
-          if (event.data === 2) {
-            setIsPlaying(false);
-          }
-        },
-      },
-    });
-  };
 
   // Countdown Timer Effect
   useEffect(() => {
@@ -181,31 +127,6 @@ export default function WeddingApp() {
     }
   }, [hasRSVPd, slideshowImages.length]);
 
-  // Load video via YouTube Iframe SDK
-  const loadSongVideo = async (song: any) => {
-    if (!song) return;
-    try {
-      const query = `${song.song_title} ${song.artist}`;
-      const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      
-      const videoId = data.videoId || 'dQw4w9WgXcQ';
-
-      if (playerRef.current && isPlayerReady && typeof playerRef.current.loadVideoById === 'function') {
-        playerRef.current.loadVideoById(videoId);
-        setIsPlaying(true);
-      }
-    } catch (err) {
-      console.error('Failed to resolve song video:', err);
-    }
-  };
-
-  useEffect(() => {
-    if (currentSong?.id && hasRSVPd && isPlayerReady) {
-      loadSongVideo(currentSong);
-    }
-  }, [currentSong?.id, hasRSVPd, isPlayerReady]);
-
   // Fetch song requests from Supabase
   const fetchSongs = async () => {
     try {
@@ -230,6 +151,26 @@ export default function WeddingApp() {
       console.error('Fetch exception:', err);
     }
   };
+
+  // Resolve video ID when active song changes
+  useEffect(() => {
+    if (currentSong && hasRSVPd) {
+      const resolveVideo = async () => {
+        try {
+          const query = `${currentSong.song_title} ${currentSong.artist}`;
+          const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          if (data.videoId) {
+            setCurrentVideoId(data.videoId);
+            setIsPlaying(true);
+          }
+        } catch (e) {
+          console.error('Video resolve failed:', e);
+        }
+      };
+      resolveVideo();
+    }
+  }, [currentSong, hasRSVPd]);
 
   // Fetch RSVPs for Admin Panel
   const fetchRSVPs = async () => {
@@ -369,34 +310,8 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state via YouTube API SDK
-  const togglePlayPause = () => {
-    if (!playerRef.current) return;
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
-      setIsPlaying(false);
-    } else {
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
-      
-      {/* UNTHROTTLED UNCLIPPED YOUTUBE IFRAME CONTAINER */}
-      <div 
-        id="yt-hidden-player" 
-        style={{ 
-          position: 'fixed', 
-          top: '-9999px', 
-          left: '-9999px', 
-          width: '1px', 
-          height: '1px', 
-          opacity: 0.01, 
-          pointerEvents: 'none' 
-        }} 
-      />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
       <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
@@ -794,7 +709,7 @@ export default function WeddingApp() {
                 {activeGuideTab === 'map' && (
                   <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-base">🗺️ VENUE LOCATION</span>
+                      <span className="text-yellow-400 font-bold block mb-2 text-base">MAP LOCATION</span>
                       <p className="text-gray-300">São Lourenço Bay, Santa Maria Island, Azores, Portugal.</p>
                     </div>
                   </div>
@@ -803,17 +718,27 @@ export default function WeddingApp() {
             </main>
           </div>
 
-          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
+          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR WITH VISIBLE EMBED PLAYER */}
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 p-3 md:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
-              <div className="flex items-center gap-3 w-full md:w-auto text-left">
-                <button
-                  type="button"
-                  onClick={togglePlayPause}
-                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold p-3 border border-pink-500 cursor-pointer shrink-0 min-w-[50px] text-center text-sm pointer-events-auto"
-                >
-                  {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
-                </button>
+              <div className="flex items-center gap-4 w-full md:w-auto text-left">
+                
+                {/* VISIBLE YOUTUBE EMBED PLAYER WIDGET */}
+                <div className="w-28 h-16 bg-gray-900 border border-pink-500/80 shrink-0 overflow-hidden relative">
+                  {currentVideoId ? (
+                    <iframe
+                      className="w-full h-full"
+                      src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1`}
+                      allow="autoplay; encrypted-media"
+                      title="Wedding Jukebox Player"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-[10px] text-gray-500 text-center p-1">
+                      No track selected
+                    </div>
+                  )}
+                </div>
+
                 <div className="overflow-hidden">
                   <div className="text-pink-400 font-bold text-sm truncate">
                     {currentSong ? currentSong.song_title : 'No track selected'}
