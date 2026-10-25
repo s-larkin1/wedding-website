@@ -138,10 +138,12 @@ export default function WeddingApp() {
         const audioEl = document.getElementById('wedding-audio-player') as HTMLAudioElement;
         if (audioEl) {
           audioEl.src = `https://pipedapi.kavin.rocks/streams/${data.videoId}`;
-          audioEl.play().catch((e) => {
+          audioEl.play().then(() => {
+            setIsPlaying(true);
+          }).catch((e) => {
             console.log('Autoplay blocked by browser until user click:', e);
+            setIsPlaying(false);
           });
-          setIsPlaying(true);
         }
       }
     } catch (err) {
@@ -323,27 +325,32 @@ export default function WeddingApp() {
     const audioEl = document.getElementById('wedding-audio-player') as HTMLAudioElement;
     if (!audioEl) return;
 
-    if (isPlaying) {
+    if (!audioEl.src && currentSong) {
+      await playSongAudio(currentSong);
+      return;
+    }
+
+    if (audioEl.paused) {
+      audioEl.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.error('Play prevented:', err);
+      });
+    } else {
       audioEl.pause();
       setIsPlaying(false);
-    } else {
-      if (currentSong && !audioEl.src) {
-        await playSongAudio(currentSong);
-      } else {
-        audioEl.play().catch((e) => console.log('Audio play error:', e));
-        setIsPlaying(true);
-      }
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* DIRECT HTML5 AUDIO ENGINE */}
+      {/* HTML5 AUDIO ENGINE WITH VISIBLE CONTROLS FOR DEBUGGING */}
       <audio 
         id="wedding-audio-player" 
         onEnded={handleSongEnded} 
-        className="hidden" 
+        controls={true}
+        className="fixed bottom-20 right-4 z-50 bg-black border border-pink-500 w-64 h-10" 
       />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
