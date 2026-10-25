@@ -143,7 +143,7 @@ export default function WeddingApp() {
     }
   };
 
-  // Initialize YT Player once API is ready (Updated with mute: 0)
+  // Initialize YT Player once API is ready
   useEffect(() => {
     if (ytApiReady && !playerRef.current) {
       playerRef.current = new window.YT.Player('audio-engine-frame', {
@@ -399,6 +399,21 @@ export default function WeddingApp() {
     }
   };
 
+  // Toggle Play / Pause state via YouTube API
+  const togglePlayPause = () => {
+    if (!playerRef.current) return;
+
+    if (isPlaying) {
+      playerRef.current.pauseVideo();
+      setIsPlaying(false);
+    } else {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(30);
+      playerRef.current.playVideo();
+      setIsPlaying(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
@@ -445,7 +460,7 @@ export default function WeddingApp() {
           {isAdminOpen ? '✕ Close Admin' : '🔑 Admin'}
         </button>
 
-        {/* ADMIN MODAL / DROPDOWN CONTAINER */}
+        {/* ADMIN MODAL CONTAINER */}
         {isAdminOpen && (
           <div className="mt-2 w-80 md:w-96 bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs">
             <div className="bg-gradient-to-r from-pink-900 to-purple-900 text-white p-2 font-bold mb-3 flex justify-between items-center border border-pink-500">
@@ -504,7 +519,7 @@ export default function WeddingApp() {
                   </button>
                 </div>
 
-                {/* TAB 1: RSVPS MANAGEMENT */}
+                {/* RSVPS MANAGEMENT */}
                 {adminTab === 'rsvps' && (
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                     {rsvpsList.length === 0 ? (
@@ -536,7 +551,7 @@ export default function WeddingApp() {
                   </div>
                 )}
 
-                {/* TAB 2: SONG REQUESTS MANAGEMENT */}
+                {/* SONG REQUESTS MANAGEMENT */}
                 {adminTab === 'songs' && (
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                     {requestedSongs.length === 0 ? (
@@ -643,7 +658,7 @@ export default function WeddingApp() {
         </div>
       ) : (
 
-        /* PAGE 2: MAIN HUB WITH SLIDESHOW */
+        /* PAGE 2: MAIN HUB WITH SLIDESHOW & FLOATING MUSIC PLAYER BAR */
         <>
           <div className="fixed inset-0 z-0">
             {slideshowImages.map((img, index) => (
@@ -666,7 +681,7 @@ export default function WeddingApp() {
             </header>
 
             <main className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              {/* SONG REQUEST CARD (EXPANDED BOX) */}
+              {/* SONG REQUEST CARD */}
               <div className="border border-pink-500/50 bg-black/85 p-6 shadow-xl flex flex-col justify-between">
                 <div>
                   <h2 className="text-base font-bold text-yellow-400 uppercase tracking-widest border-b border-gray-800 pb-2 mb-4">
@@ -809,6 +824,50 @@ export default function WeddingApp() {
                 )}
               </div>
             </main>
+          </div>
+
+          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 p-3 md:p-4 shadow-2xl backdrop-blur-md">
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+              <div className="flex items-center gap-3 w-full md:w-auto text-left">
+                <button
+                  type="button"
+                  onClick={togglePlayPause}
+                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold p-3 border border-pink-500 cursor-pointer shrink-0 min-w-[50px] text-center"
+                >
+                  {isPlaying ? '⏸' : '▶'}
+                </button>
+                <div className="overflow-hidden">
+                  <div className="text-pink-400 font-bold text-sm truncate">
+                    {currentSong ? currentSong.song_title : 'No track selected'}
+                  </div>
+                  <div className="text-gray-400 text-xs truncate">
+                    {currentSong ? `By ${currentSong.artist}` : 'Add a track above!'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleShuffleClick}
+                  className={`px-3 py-1.5 font-bold border text-xs cursor-pointer transition-colors ${
+                    isShuffle 
+                      ? 'bg-pink-900/80 border-pink-500 text-pink-300' 
+                      : 'bg-gray-900 border-gray-700 text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  🔀 Shuffle: {isShuffle ? 'ON' : 'OFF'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSongEnded}
+                  className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 font-bold text-xs cursor-pointer"
+                >
+                  ⏭ Next
+                </button>
+              </div>
+            </div>
           </div>
         </>
       )}
