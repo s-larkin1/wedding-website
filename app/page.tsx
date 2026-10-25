@@ -8,6 +8,13 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibm9jenpzd2p0enFua2tyaW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNTY4NjcsImV4cCI6MjEwMjczMjg2N30.L7zlOp0jkOqGYTHb_c8P_AvGO6B0H5pr6AVHwDHTYvc'
 );
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: any;
+  }
+}
+
 export default function WeddingApp() {
   const [hasRSVPd, setHasRSVPd] = useState(false);
   const [guestName, setGuestName] = useState('');
@@ -38,8 +45,9 @@ export default function WeddingApp() {
   // Info Section Tab State ('travel' | 'activities' | 'faq' | 'map')
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
 
-  // Audio Element Reference
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // YouTube Iframe Player Reference & State
+  const playerRef = useRef<any>(null);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
 
   // Refs for auto-play sequence state management
   const requestedSongsRef = useRef<any[]>([]);
@@ -71,6 +79,53 @@ export default function WeddingApp() {
     '/photo8.jpg',
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Load YouTube Iframe API Script
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => {
+        initYouTubePlayer();
+      };
+    } else {
+      initYouTubePlayer();
+    }
+  }, []);
+
+  const initYouTubePlayer = () => {
+    if (playerRef.current) return;
+    playerRef.current = new window.YT.Player('yt-hidden-player', {
+      height: '0',
+      width: '0',
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+      },
+      events: {
+        onReady: () => {
+          setIsPlayerReady(true);
+        },
+        onStateChange: (event: any) => {
+          // YT.PlayerState.ENDED === 0
+          if (event.data === 0) {
+            handleSongEnded();
+          }
+          // YT.PlayerState.PLAYING === 1
+          if (event.data === 1) {
+            setIsPlaying(true);
+          }
+          // YT.PlayerState.PAUSED === 2
+          if (event.data === 2) {
+            setIsPlaying(false);
+          }
+        },
+      },
+    });
+  };
 
   // Countdown Timer Effect
   useEffect(() => {
@@ -129,26 +184,30 @@ export default function WeddingApp() {
     }
   }, [hasRSVPd, slideshowImages.length]);
 
-  // Load and play direct audio sample stream
-  const playSongAudio = async (song: any) => {
-    if (!song || !audioRef.current) return;
-    
-    // Using a reliable working audio stream URL
-    audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
-    
-    audioRef.current.play().then(() => {
-      setIsPlaying(true);
-    }).catch((err) => {
-      console.error('Playback restricted:', err);
-      setIsPlaying(false);
-    });
+  // Load video via YouTube Iframe SDK
+  const loadSongVideo = async (song: any) => {
+    if (!song) return;
+    try {
+      const query = `${song.song_title} ${song.artist}`;
+      const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      
+      const videoId = data.videoId || 'dQw4w9WgXcQ';
+
+      if (playerRef.current && isPlayerReady && typeof playerRef.current.loadVideoById === 'function') {
+        playerRef.current.loadVideoById(videoId);
+        setIsPlaying(true);
+      }
+    } catch (err) {
+      console.error('Failed to resolve song video:', err);
+    }
   };
 
   useEffect(() => {
-    if (currentSong?.id && hasRSVPd) {
-      playSongAudio(currentSong);
+    if (currentSong?.id && hasRSVPd && isPlayerReady) {
+      loadSongVideo(currentSong);
     }
-  }, [currentSong?.id, hasRSVPd]);
+  }, [currentSong?.id, hasRSVPd, isPlayerReady]);
 
   // Fetch song requests from Supabase
   const fetchSongs = async () => {
@@ -313,36 +372,23 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state via Audio Ref
-  const togglePlayPause = async () => {
-    if (!audioRef.current) return;
-
-    if (!audioRef.current.src && currentSong) {
-      await playSongAudio(currentSong);
-      return;
-    }
-
-    if (audioRef.current.paused) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((err) => {
-        console.error('Play prevented:', err);
-      });
-    } else {
-      audioRef.current.pause();
+  // Toggle Play / Pause state via YouTube API SDK
+  const togglePlayPause = () => {
+    if (!playerRef.current) return;
+    if (isPlaying) {
+      playerRef.current.pauseVideo();
       setIsPlaying(false);
+    } else {
+      playerRef.current.playVideo();
+      setIsPlaying(true);
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* HTML5 AUDIO ENGINE */}
-      <audio 
-        ref={audioRef}
-        onEnded={handleSongEnded} 
-        className="hidden" 
-      />
+      {/* HIDDEN YOUTUBE SDK IFRAME CONTAINER */}
+      <div id="yt-hidden-player" className="hidden" />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
       <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
