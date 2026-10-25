@@ -1,25 +1,35 @@
-// Resolve audio stream when track changes
-useEffect(() => {
-  if (currentSong && hasRSVPd) {
-    const resolveAudio = async () => {
-      try {
-        const query = `${currentSong.song_title} ${currentSong.artist}`;
-        const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
+import { NextResponse } from 'next/server';
 
-        if (data.audioUrl && audioRef.current) {
-          audioRef.current.src = data.audioUrl;
-          audioRef.current.play().then(() => {
-            setIsPlaying(true);
-          }).catch((e) => {
-            console.error('Autoplay prevented:', e);
-            setIsPlaying(false);
-          });
-        }
-      } catch (e) {
-        console.error('Audio stream resolution failed:', e);
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get('q');
+
+    if (!q) {
+      return NextResponse.json({ audioUrl: null });
+    }
+
+    // Search iTunes Search API for direct MP3 audio stream previews
+    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=1`, {
+      cache: 'no-store'
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.results && data.results.length > 0) {
+        const track = data.results[0];
+        return NextResponse.json({ 
+          audioUrl: track.previewUrl,
+          trackName: track.trackName,
+          artistName: track.artistName,
+          artworkUrl: track.artworkUrl100
+        });
       }
-    };
-    resolveAudio();
+    }
+
+    return NextResponse.json({ audioUrl: null });
+  } catch (error) {
+    console.error('iTunes Search API Error:', error);
+    return NextResponse.json({ audioUrl: null }, { status: 200 });
   }
-}, [currentSong, hasRSVPd]);
+}
