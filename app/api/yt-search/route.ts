@@ -9,45 +9,39 @@ export async function GET(request: Request) {
       return NextResponse.json({ videoId: null });
     }
 
-    // Try multiple public Piped API instances in case one is rate-limited or down
+    // Public Invidious API instances known for reliable search returns
     const instances = [
-      'https://pipedapi.kavin.rocks',
-      'https://pipedapi.privacy.com.de',
-      'https://api.piped.projectsegfau.lt'
+      'https://vid.priv.au',
+      'https://invidious.privacydev.net',
+      'https://inv.nadeko.net'
     ];
 
     for (const baseUrl of instances) {
       try {
-        const res = await fetch(`${baseUrl}/search?q=${encodeURIComponent(q)}&filter=videos`, {
+        const res = await fetch(`${baseUrl}/api/v1/search?q=${encodeURIComponent(q)}&type=video`, {
           headers: { 'User-Agent': 'Mozilla/5.0' },
           cache: 'no-store'
         });
 
         if (res.ok) {
-          const data = await res.json();
-          const items = data.items || data;
+          const results = await res.json();
           
-          if (Array.isArray(items) && items.length > 0) {
-            // Look for any item with a video ID or stream URL
-            for (const item of items) {
-              if (item.videoId) {
-                return NextResponse.json({ videoId: item.videoId });
-              }
-              if (item.url && item.url.includes('v=')) {
-                const videoId = item.url.split('v=')[1]?.split('&')[0];
-                if (videoId) {
-                  return NextResponse.json({ videoId });
-                }
-              }
+          if (Array.isArray(results) && results.length > 0) {
+            // Invidious returns videoId directly in the video search results
+            const firstMatch = results.find((item: any) => item.videoId || item.type === 'video');
+            const videoId = firstMatch?.videoId || firstMatch?.id;
+            
+            if (videoId) {
+              return NextResponse.json({ videoId });
             }
           }
         }
       } catch (instanceErr) {
-        console.warn(`Instance ${baseUrl} failed, trying next...`);
+        console.warn(`Invidious instance ${baseUrl} failed, trying next...`);
       }
     }
 
-    console.error('All Piped instances failed for query:', q);
+    console.error('All Invidious instances failed for query:', q);
     return NextResponse.json({ videoId: null });
   } catch (error) {
     console.error('YouTube Search API Error:', error);
