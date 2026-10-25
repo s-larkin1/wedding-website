@@ -9,35 +9,45 @@ export async function GET(request: Request) {
       return NextResponse.json({ videoId: null });
     }
 
-    // First attempt: try fetching search results via standard fetch endpoint
-    const res = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(q)}&filter=all`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      next: { revalidate: 3600 } // cache results for 1 hour
-    });
+    // Try multiple public Piped API instances in case one is rate-limited or down
+    const instances = [
+      'https://pipedapi.kavin.rocks',
+      'https://pipedapi.privacy.com.de',
+      'https://api.piped.projectsegfau.lt'
+    ];
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.items && data.items.length > 0) {
-        // Find first video item
-        const firstVideo = data.items.find((item: any) => item.type === 'stream');
-        if (firstVideo && firstVideo.url) {
-          const videoId = firstVideo.url.split('v=')[1];
-          if (videoId) {
-            return NextResponse.json({ videoId });
+    for (const baseUrl of instances) {
+      try {
+        const res = await fetch(`${baseUrl}/search?q=${encodeURIComponent(q)}&filter=videos`, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          cache: 'no-store'
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.items || data;
+          
+          if (Array.isArray(items) && items.length > 0) {
+            // Look for any item with a video ID or stream URL
+            for (const item of items) {
+              if (item.videoId) {
+                return NextResponse.json({ videoId: item.videoId });
+              }
+              if (item.url && item.url.includes('v=')) {
+                const videoId = item.url.split('v=')[1]?.split('&')[0];
+                if (videoId) {
+                  return NextResponse.json({ videoId });
+                }
+              }
+            }
           }
         }
+      } catch (instanceErr) {
+        console.warn(`Instance ${baseUrl} failed, trying next...`);
       }
     }
 
-    // Fallback: try yt-search dynamically if API fetch failed
-    // @ts-ignore
-    const ytSearch = (await import('yt-search')).default;
-    const r = await ytSearch(q);
-
-    if (r && r.videos && r.videos.length > 0) {
-      return NextResponse.json({ videoId: r.videos[0].videoId });
-    }
-
+    console.error('All Piped instances failed for query:', q);
     return NextResponse.json({ videoId: null });
   } catch (error) {
     console.error('YouTube Search API Error:', error);
