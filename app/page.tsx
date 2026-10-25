@@ -345,12 +345,11 @@ export default function WeddingApp() {
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* HTML5 AUDIO ENGINE WITH VISIBLE CONTROLS FOR DEBUGGING */}
+      {/* HIDDEN HTML5 AUDIO ENGINE */}
       <audio 
         id="wedding-audio-player" 
         onEnded={handleSongEnded} 
-        controls={true}
-        className="fixed bottom-20 right-4 z-50 bg-black border border-pink-500 w-64 h-10" 
+        className="hidden" 
       />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
