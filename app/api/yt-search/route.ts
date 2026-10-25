@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+// @ts-ignore
 import ytSearch from 'yt-search';
 
 export async function GET(request: Request) {
