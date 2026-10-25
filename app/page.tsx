@@ -20,7 +20,6 @@ export default function WeddingApp() {
   const [artist, setArtist] = useState('');
   const [requestedSongs, setRequestedSongs] = useState<any[]>([]);
   const [currentSong, setCurrentSong] = useState<any | null>(null);
-  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
   // Shuffle Mode State
@@ -39,7 +38,10 @@ export default function WeddingApp() {
   // Info Section Tab State
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
 
-  // Refs for state management in callbacks
+  // HTML5 Audio Reference
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Refs for state management
   const requestedSongsRef = useRef<any[]>([]);
   const currentSongRef = useRef<any | null>(null);
   const isShuffleRef = useRef<boolean>(true);
@@ -95,8 +97,8 @@ export default function WeddingApp() {
     return () => clearInterval(interval);
   }, []);
 
-  // Play Next Song when current track ends
-  const handleSongEnded = () => {
+  // Play Next Song in queue
+  const handleNextSong = () => {
     const songs = requestedSongsRef.current;
     const activeTrack = currentSongRef.current;
     const shuffleMode = isShuffleRef.current;
@@ -151,26 +153,6 @@ export default function WeddingApp() {
       console.error('Fetch exception:', err);
     }
   };
-
-  // Resolve video ID when active song changes
-  useEffect(() => {
-    if (currentSong && hasRSVPd) {
-      const resolveVideo = async () => {
-        try {
-          const query = `${currentSong.song_title} ${currentSong.artist}`;
-          const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
-          const data = await res.json();
-          if (data.videoId) {
-            setCurrentVideoId(data.videoId);
-            setIsPlaying(true);
-          }
-        } catch (e) {
-          console.error('Video resolve failed:', e);
-        }
-      };
-      resolveVideo();
-    }
-  }, [currentSong, hasRSVPd]);
 
   // Fetch RSVPs for Admin Panel
   const fetchRSVPs = async () => {
@@ -310,8 +292,30 @@ export default function WeddingApp() {
     }
   };
 
+  // Toggle Play / Pause Audio
+  const togglePlayPause = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((e) => {
+        console.error('Audio playback error:', e);
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
+
+      {/* HTML5 Direct Web Audio Player */}
+      <audio 
+        ref={audioRef}
+        onEnded={handleNextSong}
+        className="hidden"
+      />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
       <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
@@ -607,7 +611,7 @@ export default function WeddingApp() {
                   onClick={handleSongSubmit}
                   className="w-full bg-pink-700 hover:bg-pink-600 text-white font-bold px-4 py-2.5 border border-pink-500 mt-6 cursor-pointer text-sm"
                 >
-                  + Add Track & Play Now
+                  + Add Track to Playlist
                 </button>
               </div>
 
@@ -718,26 +722,18 @@ export default function WeddingApp() {
             </main>
           </div>
 
-          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR WITH VISIBLE EMBED PLAYER */}
+          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 p-3 md:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
               <div className="flex items-center gap-4 w-full md:w-auto text-left">
                 
-                {/* VISIBLE YOUTUBE EMBED PLAYER WIDGET */}
-                <div className="w-28 h-16 bg-gray-900 border border-pink-500/80 shrink-0 overflow-hidden relative">
-                  {currentVideoId ? (
-                    <iframe
-                      className="w-full h-full"
-                      src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1`}
-                      allow="autoplay; encrypted-media"
-                      title="Wedding Jukebox Player"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-[10px] text-gray-500 text-center p-1">
-                      No track selected
-                    </div>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={togglePlayPause}
+                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold px-4 py-2.5 border border-pink-500 cursor-pointer shrink-0 text-xs flex items-center gap-1.5"
+                >
+                  {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
+                </button>
 
                 <div className="overflow-hidden">
                   <div className="text-pink-400 font-bold text-sm truncate">
@@ -763,7 +759,7 @@ export default function WeddingApp() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleSongEnded}
+                  onClick={handleNextSong}
                   className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 font-bold text-xs cursor-pointer pointer-events-auto"
                 >
                   NEXT ⏭
