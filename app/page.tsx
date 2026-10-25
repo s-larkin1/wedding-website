@@ -8,13 +8,6 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibm9jenpzd2p0enFua2tyaW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNTY4NjcsImV4cCI6MjEwMjczMjg2N30.L7zlOp0jkOqGYTHb_c8P_AvGO6B0H5pr6AVHwDHTYvc'
 );
 
-declare global {
-  interface Window {
-    onYouTubeIframeAPIReady?: () => void;
-    YT?: any;
-  }
-}
-
 export default function WeddingApp() {
   const [hasRSVPd, setHasRSVPd] = useState(false);
   const [guestName, setGuestName] = useState('');
@@ -44,10 +37,6 @@ export default function WeddingApp() {
 
   // Info Section Tab State ('travel' | 'activities' | 'faq' | 'map')
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
-
-  // YouTube API Player References
-  const playerRef = useRef<any>(null);
-  const [ytApiReady, setYtApiReady] = useState(false);
 
   // Refs for auto-play sequence state management
   const requestedSongsRef = useRef<any[]>([]);
@@ -105,22 +94,6 @@ export default function WeddingApp() {
     return () => clearInterval(interval);
   }, []);
 
-  // Load YouTube IFrame API Script
-  useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
-
-      window.onYouTubeIframeAPIReady = () => {
-        setYtApiReady(true);
-      };
-    } else {
-      setYtApiReady(true);
-    }
-  }, []);
-
   // Play Next Song when current track ends
   const handleSongEnded = () => {
     const songs = requestedSongsRef.current;
@@ -143,32 +116,6 @@ export default function WeddingApp() {
     }
   };
 
-  // Initialize YT Player (Rendered with small dimensions so browser allows audio streaming)
-  useEffect(() => {
-    if (ytApiReady && !playerRef.current) {
-      playerRef.current = new window.YT.Player('audio-engine-frame', {
-        height: '100',
-        width: '100',
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          mute: 0,
-        },
-        events: {
-          onReady: (event: any) => {
-            if (event.target.unMute) event.target.unMute();
-            if (event.target.setVolume) event.target.setVolume(100);
-          },
-          onStateChange: (event: any) => {
-            if (event.data === 0) {
-              handleSongEnded();
-            }
-          },
-        },
-      });
-    }
-  }, [ytApiReady]);
-
   // Handle Background Slideshow
   useEffect(() => {
     if (hasRSVPd) {
@@ -179,7 +126,7 @@ export default function WeddingApp() {
     }
   }, [hasRSVPd, slideshowImages.length]);
 
-  // Fetch YouTube Video ID dynamically and load into player seamlessly
+  // Fetch YouTube Video ID dynamically and load into HTML5 Audio Player
   const playSongAudio = async (song: any) => {
     if (!song) return;
     try {
@@ -187,13 +134,15 @@ export default function WeddingApp() {
       const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       
-      if (data.videoId && playerRef.current?.loadVideoById) {
-        playerRef.current.loadVideoById(data.videoId);
-        if (playerRef.current.unMute) playerRef.current.unMute();
-        if (playerRef.current.setVolume) playerRef.current.setVolume(100);
-        if (playerRef.current.playVideo) playerRef.current.playVideo();
-
-        setIsPlaying(true);
+      if (data.videoId) {
+        const audioEl = document.getElementById('wedding-audio-player') as HTMLAudioElement;
+        if (audioEl) {
+          audioEl.src = `https://pipedapi.kavin.rocks/streams/${data.videoId}`;
+          audioEl.play().catch((e) => {
+            console.log('Autoplay blocked by browser until user click:', e);
+          });
+          setIsPlaying(true);
+        }
       }
     } catch (err) {
       console.error('Failed to load audio track:', err);
@@ -201,10 +150,10 @@ export default function WeddingApp() {
   };
 
   useEffect(() => {
-    if (currentSong && ytApiReady) {
+    if (currentSong) {
       playSongAudio(currentSong);
     }
-  }, [currentSong, ytApiReady]);
+  }, [currentSong]);
 
   // Fetch song requests from Supabase
   const fetchSongs = async () => {
@@ -369,31 +318,33 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state directly triggering player
+  // Toggle Play / Pause state on HTML5 Audio Element
   const togglePlayPause = async () => {
-    if (!playerRef.current) return;
+    const audioEl = document.getElementById('wedding-audio-player') as HTMLAudioElement;
+    if (!audioEl) return;
 
     if (isPlaying) {
-      if (playerRef.current.pauseVideo) playerRef.current.pauseVideo();
+      audioEl.pause();
       setIsPlaying(false);
     } else {
-      if (currentSong) {
+      if (currentSong && !audioEl.src) {
         await playSongAudio(currentSong);
+      } else {
+        audioEl.play().catch((e) => console.log('Audio play error:', e));
+        setIsPlaying(true);
       }
-      if (playerRef.current.unMute) playerRef.current.unMute();
-      if (playerRef.current.setVolume) playerRef.current.setVolume(100);
-      if (playerRef.current.playVideo) playerRef.current.playVideo();
-      setIsPlaying(true);
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* ACTIVE YOUTUBE IFRAME CONTAINER (POSITIONED SO BROWSER ALLOWS AUDIO STREAMING) */}
-      <div style={{ position: 'fixed', bottom: 0, right: 0, width: '100px', height: '100px', zIndex: 1, opacity: 0.01, pointerEvents: 'none' }}>
-        <div id="audio-engine-frame" />
-      </div>
+      {/* DIRECT HTML5 AUDIO ENGINE */}
+      <audio 
+        id="wedding-audio-player" 
+        onEnded={handleSongEnded} 
+        className="hidden" 
+      />
 
       {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
       <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm">
@@ -806,9 +757,9 @@ export default function WeddingApp() {
                 <button
                   type="button"
                   onClick={togglePlayPause}
-                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold p-3 border border-pink-500 cursor-pointer shrink-0 min-w-[50px] text-center"
+                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold p-3 border border-pink-500 cursor-pointer shrink-0 min-w-[50px] text-center text-sm"
                 >
-                  {isPlaying ? '⏸' : '▶'}
+                  {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
                 </button>
                 <div className="overflow-hidden">
                   <div className="text-pink-400 font-bold text-sm truncate">
@@ -837,7 +788,7 @@ export default function WeddingApp() {
                   onClick={handleSongEnded}
                   className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 font-bold text-xs cursor-pointer"
                 >
-                  ⏭ Next
+                  NEXT ⏭
                 </button>
               </div>
             </div>
