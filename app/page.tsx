@@ -38,6 +38,9 @@ export default function WeddingApp() {
   // Info Section Tab State ('travel' | 'activities' | 'faq' | 'map')
   const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
 
+  // Audio Element Reference (Guarantees direct DOM control)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   // Refs for auto-play sequence state management
   const requestedSongsRef = useRef<any[]>([]);
   const currentSongRef = useRef<any | null>(null);
@@ -126,7 +129,7 @@ export default function WeddingApp() {
     }
   }, [hasRSVPd, slideshowImages.length]);
 
-  // Fetch YouTube Video ID dynamically and load into HTML5 Audio Player
+  // Fetch YouTube Video ID dynamically and stream into audio reference
   const playSongAudio = async (song: any) => {
     if (!song) return;
     try {
@@ -134,17 +137,14 @@ export default function WeddingApp() {
       const res = await fetch(`/api/yt-search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       
-      if (data.videoId) {
-        const audioEl = document.getElementById('wedding-audio-player') as HTMLAudioElement;
-        if (audioEl) {
-          audioEl.src = `https://pipedapi.kavin.rocks/streams/${data.videoId}`;
-          audioEl.play().then(() => {
-            setIsPlaying(true);
-          }).catch((e) => {
-            console.log('Autoplay blocked by browser until user click:', e);
-            setIsPlaying(false);
-          });
-        }
+      if (data.videoId && audioRef.current) {
+        audioRef.current.src = `https://pipedapi.kavin.rocks/streams/${data.videoId}`;
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch((e) => {
+          console.log('Autoplay blocked by browser until user click:', e);
+          setIsPlaying(false);
+        });
       }
     } catch (err) {
       console.error('Failed to load audio track:', err);
@@ -152,10 +152,10 @@ export default function WeddingApp() {
   };
 
   useEffect(() => {
-    if (currentSong) {
+    if (currentSong && hasRSVPd) {
       playSongAudio(currentSong);
     }
-  }, [currentSong]);
+  }, [currentSong, hasRSVPd]);
 
   // Fetch song requests from Supabase
   const fetchSongs = async () => {
@@ -320,24 +320,23 @@ export default function WeddingApp() {
     }
   };
 
-  // Toggle Play / Pause state on HTML5 Audio Element
+  // Toggle Play / Pause state via Audio Ref
   const togglePlayPause = async () => {
-    const audioEl = document.getElementById('wedding-audio-player') as HTMLAudioElement;
-    if (!audioEl) return;
+    if (!audioRef.current) return;
 
-    if (!audioEl.src && currentSong) {
+    if (!audioRef.current.src && currentSong) {
       await playSongAudio(currentSong);
       return;
     }
 
-    if (audioEl.paused) {
-      audioEl.play().then(() => {
+    if (audioRef.current.paused) {
+      audioRef.current.play().then(() => {
         setIsPlaying(true);
       }).catch((err) => {
         console.error('Play prevented:', err);
       });
     } else {
-      audioEl.pause();
+      audioRef.current.pause();
       setIsPlaying(false);
     }
   };
@@ -345,9 +344,9 @@ export default function WeddingApp() {
   return (
     <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
       
-      {/* HIDDEN HTML5 AUDIO ENGINE */}
+      {/* HTML5 AUDIO ENGINE REF */}
       <audio 
-        id="wedding-audio-player" 
+        ref={audioRef}
         onEnded={handleSongEnded} 
         className="hidden" 
       />
