@@ -11,7 +11,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ videoId: null });
     }
 
-    // Perform the YouTube search
     const r = await ytSearch(q);
 
     if (r && r.videos && r.videos.length > 0) {
@@ -21,7 +20,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ videoId: null });
   } catch (error) {
     console.error('YouTube Search API Error:', error);
-    // Returning a valid JSON error prevents the 500 crash page
-    return NextResponse.json({ videoId: null, error: 'Failed to search YouTube' }, { status: 200 });
+    return NextResponse.json({ videoId: null }, { status: 200 });
   }
 }
