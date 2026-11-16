@@ -334,66 +334,82 @@ export default function WeddingApp() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative">
+    <div className="min-h-[100dvh] bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative overflow-x-hidden">
 
       {/* HTML5 Direct Web Audio Player */}
       <audio 
         ref={audioRef}
         onEnded={handleNextSong}
+        playsInline
         className="hidden"
       />
 
-      {/* TOP-LEFT COUNTDOWN TIMER WIDGET */}
-      <div className="fixed top-2 left-2 z-50 bg-gray-950 border border-pink-500/80 p-2 text-gray-200 shadow-lg bg-black/80 backdrop-blur-sm pointer-events-auto">
-        <div className="text-[10px] font-bold text-pink-400 uppercase tracking-widest border-b border-gray-800 pb-1 mb-1">
-          ⏳ CEREMONY COUNTDOWN
+      {/* TOP NAVIGATION BAR (RESPONSIVE FLEX HEADER TO PREVENT OVERLAP ON MOBILE) */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-between items-start p-2 sm:p-3 pointer-events-none gap-2">
+        {/* COUNTDOWN TIMER WIDGET */}
+        <div className="bg-black/90 border border-pink-500/80 px-2.5 py-1.5 sm:p-2 text-gray-200 shadow-lg backdrop-blur-sm pointer-events-auto">
+          <div className="text-[9px] sm:text-[10px] font-bold text-pink-400 uppercase tracking-wider sm:tracking-widest border-b border-gray-800 pb-0.5 mb-1">
+            ⏳ COUNTDOWN
+          </div>
+          <div className="flex gap-1.5 sm:gap-2 text-center text-xs font-bold text-white">
+            <div>
+              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{timeLeft.days}</span>
+              <span className="text-[8px] text-gray-400 uppercase">Days</span>
+            </div>
+            <span className="text-pink-500 font-normal">:</span>
+            <div>
+              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{String(timeLeft.hours).padStart(2, '0')}</span>
+              <span className="text-[8px] text-gray-400 uppercase">Hrs</span>
+            </div>
+            <span className="text-pink-500 font-normal">:</span>
+            <div>
+              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{String(timeLeft.minutes).padStart(2, '0')}</span>
+              <span className="text-[8px] text-gray-400 uppercase">Min</span>
+            </div>
+            <span className="text-pink-500 font-normal">:</span>
+            <div>
+              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{String(timeLeft.seconds).padStart(2, '0')}</span>
+              <span className="text-[8px] text-gray-400 uppercase">Sec</span>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2 text-center text-xs font-bold text-white">
-          <div>
-            <span className="text-yellow-400 text-sm block">{timeLeft.days}</span>
-            <span className="text-[8px] text-gray-400 uppercase">Days</span>
-          </div>
-          <span className="text-pink-500 font-normal">:</span>
-          <div>
-            <span className="text-yellow-400 text-sm block">{String(timeLeft.hours).padStart(2, '0')}</span>
-            <span className="text-[8px] text-gray-400 uppercase">Hrs</span>
-          </div>
-          <span className="text-pink-500 font-normal">:</span>
-          <div>
-            <span className="text-yellow-400 text-sm block">{String(timeLeft.minutes).padStart(2, '0')}</span>
-            <span className="text-[8px] text-gray-400 uppercase">Min</span>
-          </div>
-          <span className="text-pink-500 font-normal">:</span>
-          <div>
-            <span className="text-yellow-400 text-sm block">{String(timeLeft.seconds).padStart(2, '0')}</span>
-            <span className="text-[8px] text-gray-400 uppercase">Sec</span>
-          </div>
+
+        {/* ADMIN PANEL TRIGGER WIDGET */}
+        <div className="pointer-events-auto shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsAdminOpen(!isAdminOpen)}
+            className="bg-gray-900/95 hover:bg-pink-900 active:bg-pink-800 text-pink-400 font-bold border border-pink-500 px-3 py-2 sm:py-1.5 shadow-lg cursor-pointer min-h-[38px]"
+          >
+            {isAdminOpen ? '✕ Close' : '🔑 Admin'}
+          </button>
         </div>
       </div>
 
-      {/* TOP-RIGHT ADMIN PANEL TRIGGER WIDGET */}
-      <div className="fixed top-2 right-2 z-50 pointer-events-auto">
-        <button
-          type="button"
-          onClick={() => setIsAdminOpen(!isAdminOpen)}
-          className="bg-gray-900 hover:bg-pink-900 text-pink-400 font-bold border border-pink-500 px-3 py-1 shadow-lg cursor-pointer"
-        >
-          {isAdminOpen ? '✕ Close Admin' : '🔑 Admin'}
-        </button>
-
-        {/* ADMIN MODAL CONTAINER */}
-        {isAdminOpen && (
-          <div className="mt-2 w-80 md:w-96 bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs pointer-events-auto">
+      {/* ADMIN MODAL OVERLAY (CENTERED & MOBILE-SAFE) */}
+      {isAdminOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-3 bg-black/70 backdrop-blur-xs pointer-events-auto">
+          <div className="w-full max-w-md bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs">
             <div className="bg-gradient-to-r from-pink-900 to-purple-900 text-white p-2 font-bold mb-3 flex justify-between items-center border border-pink-500">
               <span>ADMIN DASHBOARD</span>
-              {isAdminAuthenticated && (
-                <button 
-                  onClick={() => setIsAdminAuthenticated(false)}
-                  className="text-[10px] bg-red-800 hover:bg-red-700 px-1.5 py-0.5 border border-red-500 cursor-pointer"
+              <div className="flex items-center gap-2">
+                {isAdminAuthenticated && (
+                  <button 
+                    type="button"
+                    onClick={() => setIsAdminAuthenticated(false)}
+                    className="text-[10px] bg-red-800 hover:bg-red-700 px-2 py-1 border border-red-500 cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsAdminOpen(false)}
+                  className="text-[10px] bg-gray-800 hover:bg-gray-700 px-2 py-1 border border-gray-500 cursor-pointer"
                 >
-                  Logout
+                  ✕
                 </button>
-              )}
+              </div>
             </div>
 
             {!isAdminAuthenticated ? (
@@ -405,12 +421,12 @@ export default function WeddingApp() {
                     placeholder="Password"
                     value={adminPasswordInput}
                     onChange={(e) => setAdminPasswordInput(e.target.value)}
-                    className="w-full bg-black border border-gray-700 p-2 text-white focus:border-pink-500 focus:outline-none"
+                    className="w-full bg-black border border-gray-700 p-2.5 text-base text-white focus:border-pink-500 focus:outline-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-pink-700 hover:bg-pink-600 text-white font-bold p-2 border border-pink-500 cursor-pointer"
+                  className="w-full bg-pink-700 hover:bg-pink-600 text-white font-bold p-2.5 border border-pink-500 cursor-pointer text-sm"
                 >
                   Unlock Dashboard
                 </button>
@@ -419,8 +435,9 @@ export default function WeddingApp() {
               <div>
                 <div className="flex border-b border-gray-800 mb-3 gap-2">
                   <button
+                    type="button"
                     onClick={() => setAdminTab('rsvps')}
-                    className={`pb-1 px-2 font-bold border-b-2 cursor-pointer ${
+                    className={`pb-1.5 px-2 font-bold border-b-2 cursor-pointer text-xs ${
                       adminTab === 'rsvps'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -429,8 +446,9 @@ export default function WeddingApp() {
                     RSVPs ({rsvpsList.length})
                   </button>
                   <button
+                    type="button"
                     onClick={() => setAdminTab('songs')}
-                    className={`pb-1 px-2 font-bold border-b-2 cursor-pointer ${
+                    className={`pb-1.5 px-2 font-bold border-b-2 cursor-pointer text-xs ${
                       adminTab === 'songs'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -442,27 +460,27 @@ export default function WeddingApp() {
 
                 {/* RSVPS MANAGEMENT */}
                 {adminTab === 'rsvps' && (
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-[55dvh] overflow-y-auto pr-1">
                     {rsvpsList.length === 0 ? (
                       <p className="text-gray-500 italic">No RSVPs recorded yet.</p>
                     ) : (
                       rsvpsList.map((item) => (
-                        <div key={item.id} className="bg-black p-2 border border-gray-800 flex justify-between items-start gap-2">
-                          <div>
-                            <div className="font-bold text-white">{item.guest_names}</div>
-                            <div className="text-[10px] text-gray-400">
+                        <div key={item.id} className="bg-black p-2.5 border border-gray-800 flex justify-between items-start gap-2">
+                          <div className="min-w-0">
+                            <div className="font-bold text-white break-words">{item.guest_names}</div>
+                            <div className="text-[11px] text-gray-400">
                               Status: <span className="uppercase text-yellow-400">{item.status}</span>
                             </div>
                             {item.notes && (
-                              <div className="text-[10px] text-pink-300/80 mt-1 italic">
-                                &quot;{item.notes}&quot;
+                              <div className="text-[11px] text-pink-300/80 mt-1 italic break-words">
+                                "{item.notes}"
                               </div>
                             )}
                           </div>
                           <button
                             type="button"
                             onClick={() => handleDeleteRSVP(item.id)}
-                            className="bg-red-900/80 hover:bg-red-700 text-white text-[10px] px-2 py-1 border border-red-500 cursor-pointer shrink-0"
+                            className="bg-red-900/80 hover:bg-red-700 text-white text-[11px] px-2.5 py-1.5 border border-red-500 cursor-pointer shrink-0"
                           >
                             Delete
                           </button>
@@ -474,21 +492,21 @@ export default function WeddingApp() {
 
                 {/* SONG REQUESTS MANAGEMENT */}
                 {adminTab === 'songs' && (
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-[55dvh] overflow-y-auto pr-1">
                     {requestedSongs.length === 0 ? (
                       <p className="text-gray-500 italic">No song requests recorded yet.</p>
                     ) : (
                       requestedSongs.map((song) => (
-                        <div key={song.id} className="bg-black p-2 border border-gray-800 flex justify-between items-center">
-                          <div className="max-w-[200px] truncate">
+                        <div key={song.id} className="bg-black p-2.5 border border-gray-800 flex justify-between items-center gap-2">
+                          <div className="min-w-0 flex-1">
                             <div className="font-bold text-pink-400 truncate">{song.song_title}</div>
-                            <div className="text-[10px] text-gray-400 truncate">{song.artist}</div>
-                            <div className="text-[9px] text-gray-600 truncate">By: {song.requested_by || 'Anon'}</div>
+                            <div className="text-[11px] text-gray-400 truncate">{song.artist}</div>
+                            <div className="text-[10px] text-gray-600 truncate">By: {song.requested_by || 'Anon'}</div>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleDeleteSong(song.id)}
-                            className="bg-red-900/80 hover:bg-red-700 text-white text-[10px] px-2 py-1 border border-red-500 cursor-pointer"
+                            className="bg-red-900/80 hover:bg-red-700 text-white text-[11px] px-2.5 py-1.5 border border-red-500 cursor-pointer shrink-0"
                           >
                             Delete
                           </button>
@@ -500,22 +518,22 @@ export default function WeddingApp() {
               </div>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* PAGE 1: SPLASH SCREEN */}
+      {/* PAGE 1: SPLASH SCREEN (MOBILE VIEWPORT & KEYBOARD SAFE) */}
       {!hasRSVPd ? (
         <div 
-          className="relative h-screen w-full flex flex-col justify-end items-center bg-cover bg-center pb-12 pointer-events-auto"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.85), transparent), url('/saolaurenco.jpg')` }}
+          className="relative min-h-[100dvh] w-full flex flex-col justify-end sm:justify-center items-center bg-cover bg-center pt-20 pb-6 sm:py-12 px-3 pointer-events-auto"
+          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2)), url('/saolaurenco.jpg')` }}
         >
-          <div className="bg-gray-200 border-2 border-gray-400 p-6 max-w-lg w-full mx-4 shadow-2xl text-black">
-            <div className="bg-blue-900 text-white font-bold px-3 py-1.5 mb-4 flex justify-between items-center text-base">
-              <span>Molly and Sean - Best Wedding Ever</span>
-              <span>[X]</span>
+          <div className="bg-gray-200 border-2 border-gray-400 p-4 sm:p-6 max-w-lg w-full shadow-2xl text-black">
+            <div className="bg-blue-900 text-white font-bold px-3 py-2 mb-4 flex justify-between items-center text-sm sm:text-base gap-2">
+              <span className="truncate">Molly & Sean - Best Wedding Ever</span>
+              <span className="shrink-0">[X]</span>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3.5 sm:space-y-4">
               <div>
                 <label className="block mb-1 font-bold text-sm">Guest Name(s):</label>
                 <input 
@@ -523,21 +541,27 @@ export default function WeddingApp() {
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
                   placeholder="e.g. John & Jane Doe"
-                  className="w-full p-2 border-2 border-gray-600 text-black bg-white focus:outline-none text-sm"
+                  className="w-full p-2.5 border-2 border-gray-600 text-black bg-white focus:outline-none text-base"
                 />
               </div>
 
               <div>
                 <label className="block mb-1 font-bold text-sm">Attending?</label>
-                <div className="flex gap-6 bg-white p-2.5 border border-gray-400 text-sm">
+                <div className="grid grid-cols-3 gap-2 bg-white p-2 border border-gray-400 text-sm">
                   {['yes', 'no', 'maybe'].map((val) => (
-                    <label key={val} className="capitalize flex items-center gap-1.5 cursor-pointer font-semibold">
+                    <label
+                      key={val}
+                      className={`capitalize flex items-center justify-center gap-1.5 py-1.5 px-2 cursor-pointer font-semibold border ${
+                        rsvpStatus === val ? 'bg-blue-100 border-blue-800' : 'border-transparent'
+                      }`}
+                    >
                       <input 
                         type="radio" 
                         name="rsvp" 
                         value={val} 
                         checked={rsvpStatus === val} 
                         onChange={(e) => setRsvpStatus(e.target.value)}
+                        className="w-4 h-4"
                       />
                       {val}
                     </label>
@@ -548,11 +572,11 @@ export default function WeddingApp() {
               <div>
                 <label className="block mb-1 font-bold text-sm">Notes:</label>
                 <textarea 
-                  rows={3}
+                  rows={2}
                   value={rsvpNotes}
                   onChange={(e) => setRsvpNotes(e.target.value)}
-                  placeholder="Leave a message or extra details..."
-                  className="w-full p-2 border-2 border-gray-600 text-black bg-white focus:outline-none resize-none text-sm"
+                  placeholder="Dietary needs, song ideas, or a note..."
+                  className="w-full p-2.5 border-2 border-gray-600 text-black bg-white focus:outline-none resize-none text-base"
                 />
               </div>
 
@@ -561,7 +585,7 @@ export default function WeddingApp() {
                   type="button" 
                   onClick={handleRSVP}
                   disabled={isSubmitting}
-                  className="w-full bg-gray-300 hover:bg-gray-400 border-2 border-white font-bold p-2.5 text-base active:border-gray-500 cursor-pointer disabled:opacity-50"
+                  className="w-full bg-gray-300 hover:bg-gray-400 active:bg-gray-500 border-2 border-white font-bold p-3 text-base cursor-pointer disabled:opacity-50 min-h-[48px]"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit RSVP & Enter Site »'}
                 </button>
@@ -569,7 +593,7 @@ export default function WeddingApp() {
                 <button 
                   type="button" 
                   onClick={handleSkipRSVP}
-                  className="w-full bg-transparent hover:bg-gray-300 text-gray-700 hover:text-black font-semibold p-1.5 text-xs underline cursor-pointer text-center"
+                  className="w-full bg-transparent hover:bg-gray-300 text-gray-700 hover:text-black font-semibold py-2.5 text-xs underline cursor-pointer text-center min-h-[40px]"
                 >
                   Skip RSVP & Browse Site »
                 </button>
@@ -596,28 +620,33 @@ export default function WeddingApp() {
             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px]" />
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto p-4 md:p-6 pb-64 text-gray-200 pointer-events-auto">
-            <header className="border-2 border-pink-500 bg-black/80 p-6 mb-6 text-center shadow-lg">
-              <h1 className="text-3xl font-bold text-pink-400 tracking-wider">Welcome to Our Wedding Page</h1>
-              <p className="text-gray-300 mt-1.5 text-sm">August 4th, 2027 in beautiful São Lourenço Bay, Santa Maria, Azores</p>
+          <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-200 pointer-events-auto">
+            <header className="border-2 border-pink-500 bg-black/85 p-4 sm:p-6 mb-5 sm:mb-6 text-center shadow-lg">
+              <h1 className="text-xl sm:text-3xl font-bold text-pink-400 tracking-wide sm:tracking-wider leading-snug">
+                Welcome to Our Wedding Page
+              </h1>
+              <p className="text-gray-300 mt-1.5 text-xs sm:text-sm leading-relaxed">
+                August 4th, 2027 in beautiful São Lourenço Bay, Santa Maria, Azores
+              </p>
             </header>
 
-            <main className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <main className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
               {/* SONG REQUEST CARD */}
-              <div className="border border-pink-500/50 bg-black/85 p-6 shadow-xl flex flex-col justify-between">
+              <div className="border border-pink-500/50 bg-black/85 p-4 sm:p-6 shadow-xl flex flex-col justify-between">
                 <div>
-                  <h2 className="text-base font-bold text-yellow-400 uppercase tracking-widest border-b border-gray-800 pb-2 mb-4">
-                    &raquo; Add a Song Request
+                  <h2 className="text-sm sm:text-base font-bold text-yellow-400 uppercase tracking-widest border-b border-gray-800 pb-2 mb-4">
+                    » Add a Song Request
                   </h2>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3.5 sm:space-y-4">
                     <div>
                       <label className="block text-gray-300 mb-1.5 text-sm font-semibold">Song Title:</label>
                       <input 
                         type="text" 
                         value={songTitle}
                         onChange={(e) => setSongTitle(e.target.value)}
-                        className="w-full bg-black/90 border border-gray-700 p-2 text-white focus:border-pink-500 focus:outline-none text-sm"
+                        placeholder="e.g. Dancing Queen"
+                        className="w-full bg-black/90 border border-gray-700 p-2.5 text-white focus:border-pink-500 focus:outline-none text-base"
                       />
                     </div>
                     <div>
@@ -626,7 +655,8 @@ export default function WeddingApp() {
                         type="text" 
                         value={artist}
                         onChange={(e) => setArtist(e.target.value)}
-                        className="w-full bg-black/90 border border-gray-700 p-2 text-white focus:border-pink-500 focus:outline-none text-sm"
+                        placeholder="e.g. ABBA"
+                        className="w-full bg-black/90 border border-gray-700 p-2.5 text-white focus:border-pink-500 focus:outline-none text-base"
                       />
                     </div>
                   </div>
@@ -635,18 +665,19 @@ export default function WeddingApp() {
                 <button 
                   type="button" 
                   onClick={handleSongSubmit}
-                  className="w-full bg-pink-700 hover:bg-pink-600 text-white font-bold px-4 py-2.5 border border-pink-500 mt-6 cursor-pointer text-sm"
+                  className="w-full bg-pink-700 hover:bg-pink-600 active:bg-pink-500 text-white font-bold px-4 py-3 border border-pink-500 mt-5 sm:mt-6 cursor-pointer text-sm min-h-[46px]"
                 >
                   + Add Track to Playlist
                 </button>
               </div>
 
               {/* TRAVEL, ACTIVITIES, FAQ & MAP GUIDE CARD */}
-              <div className="border border-pink-500/50 bg-black/85 p-6 shadow-xl flex flex-col">
-                <div className="flex border-b border-gray-800 mb-4 gap-2 overflow-x-auto pb-1">
+              <div className="border border-pink-500/50 bg-black/85 p-4 sm:p-6 shadow-xl flex flex-col">
+                <div className="grid grid-cols-4 border-b border-gray-800 mb-4 gap-1 pb-1">
                   <button
+                    type="button"
                     onClick={() => setActiveGuideTab('travel')}
-                    className={`pb-1.5 px-3 font-bold border-b-2 cursor-pointer text-sm uppercase whitespace-nowrap ${
+                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
                       activeGuideTab === 'travel'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -655,18 +686,20 @@ export default function WeddingApp() {
                     ✈️ Travel
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveGuideTab('activities')}
-                    className={`pb-1.5 px-3 font-bold border-b-2 cursor-pointer text-sm uppercase whitespace-nowrap ${
+                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
                       activeGuideTab === 'activities'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
                     }`}
                   >
-                    🌋 Activities
+                    🌋 Do
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveGuideTab('faq')}
-                    className={`pb-1.5 px-3 font-bold border-b-2 cursor-pointer text-sm uppercase whitespace-nowrap ${
+                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
                       activeGuideTab === 'faq'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -675,8 +708,9 @@ export default function WeddingApp() {
                     ❓ FAQ
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveGuideTab('map')}
-                    className={`pb-1.5 px-3 font-bold border-b-2 cursor-pointer text-sm uppercase whitespace-nowrap ${
+                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
                       activeGuideTab === 'map'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -688,9 +722,9 @@ export default function WeddingApp() {
 
                 {/* TAB 1: TRAVEL & ACCOMMODATION */}
                 {activeGuideTab === 'travel' && (
-                  <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
+                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-base">✈️ GETTING TO SANTA MARIA (SMA)</span>
+                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">✈️ GETTING TO SANTA MARIA (SMA)</span>
                       <ul className="list-disc list-inside space-y-2 text-gray-300">
                         <li><strong className="text-white">Main Hub:</strong> Fly into Ponta Delgada (PDL) on São Miguel Island via SATA Air Açores or TAP Air Portugal.</li>
                         <li><strong className="text-white">Island Hopper:</strong> Take a quick 25-minute domestic flight from PDL to Santa Maria Airport (SMA).</li>
@@ -699,7 +733,7 @@ export default function WeddingApp() {
                     </div>
 
                     <div className="pt-4 border-t border-gray-800">
-                      <span className="text-pink-400 font-bold block mb-2 text-base">🏠 ACCOMMODATIONS</span>
+                      <span className="text-pink-400 font-bold block mb-2 text-sm sm:text-base">🏠 ACCOMMODATIONS</span>
                       <ul className="list-disc list-inside space-y-2 text-gray-300">
                         <li><strong className="text-white">São Lourenço Bay:</strong> Local villas and Airbnb rentals right by the beach and vineyard slopes.</li>
                         <li><strong className="text-white">Vila do Porto:</strong> Main town (15 min drive) with options like Hotel Colombo, Hotel Santa Maria, and Charming Blue.</li>
@@ -711,9 +745,9 @@ export default function WeddingApp() {
 
                 {/* TAB 2: ISLAND ACTIVITIES */}
                 {activeGuideTab === 'activities' && (
-                  <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
+                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-base">🏖️ BEACHES & NATURAL POOLS</span>
+                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">🏖️ BEACHES & NATURAL POOLS</span>
                       <ul className="list-disc list-inside space-y-2 text-gray-300">
                         <li><strong className="text-white">Praia Formosa:</strong> Famous white-sand beach perfect for swimming and oceanfront dining.</li>
                         <li><strong className="text-white">São Lourenço Bay:</strong> Natural rock pools and amphitheater-like terraced vineyards.</li>
@@ -724,9 +758,9 @@ export default function WeddingApp() {
 
                 {/* TAB 3: FAQ */}
                 {activeGuideTab === 'faq' && (
-                  <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
+                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-base">❓ FREQUENTLY ASKED QUESTIONS</span>
+                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">❓ FREQUENTLY ASKED QUESTIONS</span>
                       <ul className="list-disc list-inside space-y-2 text-gray-300">
                         <li><strong className="text-white">Dress Code:</strong> Smart casual / island formal suited for a beachside ceremony.</li>
                         <li><strong className="text-white">Weather:</strong> August in the Azores is warm and sunny, with ocean breezes.</li>
@@ -737,10 +771,18 @@ export default function WeddingApp() {
 
                 {/* TAB 4: MAP */}
                 {activeGuideTab === 'map' && (
-                  <div className="space-y-5 text-gray-300 text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-2">
+                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-base">MAP LOCATION</span>
-                      <p className="text-gray-300">São Lourenço Bay, Santa Maria Island, Azores, Portugal.</p>
+                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">MAP LOCATION</span>
+                      <p className="text-gray-300 mb-3">São Lourenço Bay, Santa Maria Island, Azores, Portugal.</p>
+                      <a
+                        href="https://maps.google.com/?q=Baia+de+Sao+Lourenco,+Santa+Maria,+Azores"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-pink-700 hover:bg-pink-600 text-white font-bold px-3.5 py-2 border border-pink-500 text-xs"
+                      >
+                        Open in Google Maps ↗
+                      </a>
                     </div>
                   </div>
                 )}
@@ -748,20 +790,19 @@ export default function WeddingApp() {
             </main>
           </div>
 
-          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 p-3 md:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
-            <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
-              <div className="flex items-center gap-4 w-full md:w-auto text-left">
-                
+          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR (MOBILE THUMB-OPTIMIZED) */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 px-3 py-2.5 sm:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
+            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
                   onClick={togglePlayPause}
-                  className="bg-pink-700 hover:bg-pink-600 text-white font-bold px-4 py-2.5 border border-pink-500 cursor-pointer shrink-0 text-xs flex items-center gap-1.5"
+                  className="bg-pink-700 hover:bg-pink-600 active:bg-pink-500 text-white font-bold px-3.5 py-2.5 border border-pink-500 cursor-pointer shrink-0 text-xs flex items-center justify-center min-h-[42px] min-w-[84px]"
                 >
                   {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
                 </button>
 
-                <div className="overflow-hidden">
+                <div className="min-w-0 flex-1">
                   <div className="text-pink-400 font-bold text-sm truncate">
                     {currentSong ? currentSong.song_title : 'No track selected'}
                   </div>
@@ -771,11 +812,11 @@ export default function WeddingApp() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={handleShuffleClick}
-                  className={`px-3 py-1.5 font-bold border text-xs cursor-pointer transition-colors pointer-events-auto ${
+                  className={`px-3 py-2 font-bold border text-xs cursor-pointer transition-colors text-center min-h-[38px] ${
                     isShuffle 
                       ? 'bg-pink-900/80 border-pink-500 text-pink-300' 
                       : 'bg-gray-900 border-gray-700 text-gray-500 hover:text-gray-300'
@@ -786,7 +827,7 @@ export default function WeddingApp() {
                 <button
                   type="button"
                   onClick={handleNextSong}
-                  className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 font-bold text-xs cursor-pointer pointer-events-auto"
+                  className="bg-gray-900 hover:bg-gray-800 active:bg-gray-700 border border-gray-700 text-gray-300 px-3 py-2 font-bold text-xs cursor-pointer text-center min-h-[38px]"
                 >
                   NEXT ⏭
                 </button>
