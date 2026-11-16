@@ -35,8 +35,8 @@ export default function WeddingApp() {
   // Countdown Timer State
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Info Section Tab State
-  const [activeGuideTab, setActiveGuideTab] = useState<'travel' | 'activities' | 'faq' | 'map'>('travel');
+  // Info Section Tab State (expanded to schedule, travel, dress code, activities, map)
+  const [activeGuideTab, setActiveGuideTab] = useState<'schedule' | 'travel' | 'dress' | 'activities' | 'map'>('schedule');
 
   // HTML5 Audio Reference
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -344,7 +344,7 @@ export default function WeddingApp() {
         className="hidden"
       />
 
-      {/* TOP NAVIGATION BAR (RESPONSIVE FLEX HEADER TO PREVENT OVERLAP ON MOBILE) */}
+      {/* TOP NAVIGATION BAR */}
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-between items-start p-2 sm:p-3 pointer-events-none gap-2">
         {/* COUNTDOWN TIMER WIDGET */}
         <div className="bg-black/90 border border-pink-500/80 px-2.5 py-1.5 sm:p-2 text-gray-200 shadow-lg backdrop-blur-sm pointer-events-auto">
@@ -386,7 +386,7 @@ export default function WeddingApp() {
         </div>
       </div>
 
-      {/* ADMIN MODAL OVERLAY (CENTERED & MOBILE-SAFE) */}
+      {/* ADMIN MODAL OVERLAY */}
       {isAdminOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-3 bg-black/70 backdrop-blur-xs pointer-events-auto">
           <div className="w-full max-w-md bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs">
@@ -521,7 +521,7 @@ export default function WeddingApp() {
         </div>
       )}
 
-      {/* PAGE 1: SPLASH SCREEN (MOBILE VIEWPORT & KEYBOARD SAFE) */}
+      {/* PAGE 1: SPLASH SCREEN */}
       {!hasRSVPd ? (
         <div 
           className="relative min-h-[100dvh] w-full flex flex-col justify-end sm:justify-center items-center bg-cover bg-center pt-20 pb-6 sm:py-12 px-3 pointer-events-auto"
@@ -603,9 +603,9 @@ export default function WeddingApp() {
         </div>
       ) : (
 
-        /* PAGE 2: MAIN HUB WITH SLIDESHOW & FLOATING MUSIC PLAYER BAR */
+        /* PAGE 2: MAIN HUB WITH SLIDESHOW & GUIDES */
         <>
-          {/* BACKGROUND SLIDESHOW WITH POINTER-EVENTS-NONE */}
+          {/* BACKGROUND SLIDESHOW */}
           <div className="fixed inset-0 z-0 pointer-events-none">
             {slideshowImages.map((img, index) => (
               <div
@@ -623,7 +623,7 @@ export default function WeddingApp() {
           <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-200 pointer-events-auto">
             <header className="border-2 border-pink-500 bg-black/85 p-4 sm:p-6 mb-5 sm:mb-6 text-center shadow-lg">
               <h1 className="text-xl sm:text-3xl font-bold text-pink-400 tracking-wide sm:tracking-wider leading-snug">
-                Welcome to Our Wedding Page
+                Molly & Sean's Wedding Celebration
               </h1>
               <p className="text-gray-300 mt-1.5 text-xs sm:text-sm leading-relaxed">
                 August 4th, 2027 in beautiful São Lourenço Bay, Santa Maria, Azores
@@ -671,24 +671,46 @@ export default function WeddingApp() {
                 </button>
               </div>
 
-              {/* TRAVEL, ACTIVITIES, FAQ & MAP GUIDE CARD */}
+              {/* WEDDING DETAILS & GUIDE CARD */}
               <div className="border border-pink-500/50 bg-black/85 p-4 sm:p-6 shadow-xl flex flex-col">
-                <div className="grid grid-cols-4 border-b border-gray-800 mb-4 gap-1 pb-1">
+                <div className="grid grid-cols-5 border-b border-gray-800 mb-4 gap-0.5 pb-1">
+                  <button
+                    type="button"
+                    onClick={() => setActiveGuideTab('schedule')}
+                    className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
+                      activeGuideTab === 'schedule'
+                        ? 'border-pink-500 text-pink-400'
+                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                    }`}
+                  >
+                    📅 Schedule
+                  </button>
                   <button
                     type="button"
                     onClick={() => setActiveGuideTab('travel')}
-                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
+                    className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'travel'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
                     }`}
                   >
-                    ✈️ Travel
+                    ✈️ Stay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveGuideTab('dress')}
+                    className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
+                      activeGuideTab === 'dress'
+                        ? 'border-pink-500 text-pink-400'
+                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                    }`}
+                  >
+                    👗 Attire
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveGuideTab('activities')}
-                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
+                    className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'activities'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -698,19 +720,8 @@ export default function WeddingApp() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setActiveGuideTab('faq')}
-                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
-                      activeGuideTab === 'faq'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
-                    }`}
-                  >
-                    ❓ FAQ
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setActiveGuideTab('map')}
-                    className={`py-2 px-1 font-bold border-b-2 cursor-pointer text-xs sm:text-sm uppercase text-center ${
+                    className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'map'
                         ? 'border-pink-500 text-pink-400'
                         : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -720,68 +731,139 @@ export default function WeddingApp() {
                   </button>
                 </div>
 
-                {/* TAB 1: TRAVEL & ACCOMMODATION */}
+                {/* TAB 1: SCHEDULE & EVENTS */}
+                {activeGuideTab === 'schedule' && (
+                  <div className="space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                    <div>
+                      <span className="text-yellow-400 font-bold block mb-1">August 3, 2027</span>
+                      <p className="text-white font-semibold">Welcome Party</p>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-800">
+                      <span className="text-yellow-400 font-bold block mb-1">August 4, 2027</span>
+                      
+                      <div className="space-y-3 mt-2">
+                        <div>
+                          <strong className="text-pink-400 block">Ceremony (5:00 PM)</strong>
+                          <p className="text-gray-300">Port at the end of São Lourenço Bay.</p>
+                          <p className="text-gray-400 text-[11px] mt-0.5">Transportation will be provided for those staying at the hotel.</p>
+                        </div>
+
+                        <div>
+                          <strong className="text-pink-400 block">Cocktail Hour & Reception (6:00 PM - 2:00 AM)</strong>
+                          <p className="text-gray-300">Ponta Negra Restaurante.</p>
+                          <p className="text-gray-400 text-[11px] mt-0.5">Drinks, dinner, and dancing all night!</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: ACCOMMODATIONS & TRAVEL */}
                 {activeGuideTab === 'travel' && (
-                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">✈️ GETTING TO SANTA MARIA (SMA)</span>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">Main Hub:</strong> Fly into Ponta Delgada (PDL) on São Miguel Island via SATA Air Açores or TAP Air Portugal.</li>
-                        <li><strong className="text-white">Island Hopper:</strong> Take a quick 25-minute domestic flight from PDL to Santa Maria Airport (SMA).</li>
-                        <li><strong className="text-white">Ferry Option:</strong> Seasonal inter-island ferries operate between São Miguel and Santa Maria during peak summer months.</li>
-                      </ul>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-800">
-                      <span className="text-pink-400 font-bold block mb-2 text-sm sm:text-base">🏠 ACCOMMODATIONS</span>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">São Lourenço Bay:</strong> Local villas and Airbnb rentals right by the beach and vineyard slopes.</li>
-                        <li><strong className="text-white">Vila do Porto:</strong> Main town (15 min drive) with options like Hotel Colombo, Hotel Santa Maria, and Charming Blue.</li>
-                        <li><strong className="text-white">Rental Cars:</strong> Highly recommended to book early directly at SMA airport for full island mobility.</li>
+                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">🏠 ACCOMMODATIONS</span>
+                      <ul className="space-y-3 text-gray-300">
+                        <li>
+                          <strong className="text-white block">Hotel Colombo</strong>
+                          <a 
+                            href="https://www.guestreservations.com/hotel-colombo-vila-do-porto/booking" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-pink-400 hover:underline text-[11px] break-all block mt-0.5"
+                          >
+                            View Booking Options ↗
+                          </a>
+                        </li>
+                        <li>
+                          <strong className="text-white block">Hotel Santa Maria</strong>
+                          <a 
+                            href="https://www.hotel-santamaria.pt/" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-pink-400 hover:underline text-[11px] break-all block mt-0.5"
+                          >
+                            hotel-santamaria.pt ↗
+                          </a>
+                        </li>
+                        <li>
+                          <strong className="text-white block">Airbnb</strong>
+                          <p className="text-gray-400 text-[11px]">Great for private rental house options across the island.</p>
+                        </li>
                       </ul>
                     </div>
                   </div>
                 )}
 
-                {/* TAB 2: ISLAND ACTIVITIES */}
+                {/* TAB 3: DRESS CODE */}
+                {activeGuideTab === 'dress' && (
+                  <div className="space-y-3 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                    <div>
+                      <span className="text-yellow-400 font-bold block mb-1 text-base">👗 ISLAND COCKTAIL</span>
+                      <p className="italic text-pink-300 mb-3">We want you to look your best while staying comfortable in the island breeze!</p>
+                    </div>
+
+                    <div className="space-y-2 text-gray-300">
+                      <div>
+                        <strong className="text-white block">For the gentlemen:</strong>
+                        <p className="text-[11px] text-gray-400">Think breathable and relaxed. Light button-ups paired with linen pants or chinos are perfect. Suits and ties are completely optional—we want you to be comfortable!</p>
+                      </div>
+
+                      <div>
+                        <strong className="text-white block">For the ladies:</strong>
+                        <p className="text-[11px] text-gray-400">We would love to see you in cocktail-style beachy dresses. Think flowy midis, vibrant colors, or fun tropical prints.</p>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-800 text-yellow-300/90 text-[11px]">
+                        💡 We won’t be on the sand (unless you want a photo on the beach!), so wear whatever shoes are most comfortable for you.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: THINGS TO DO */}
                 {activeGuideTab === 'activities' && (
-                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
-                    <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">🏖️ BEACHES & NATURAL POOLS</span>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">Praia Formosa:</strong> Famous white-sand beach perfect for swimming and oceanfront dining.</li>
-                        <li><strong className="text-white">São Lourenço Bay:</strong> Natural rock pools and amphitheater-like terraced vineyards.</li>
-                      </ul>
-                    </div>
+                  <div className="space-y-3 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                    <span className="text-yellow-400 font-bold block mb-1 text-sm sm:text-base">🌋 THINGS TO DO IN SANTA MARIA</span>
+                    <ul className="space-y-2.5 text-gray-300">
+                      <li><strong className="text-white">Miradouro do Tagarete:</strong> Viewpoint of the whole island with a swing.</li>
+                      <li><strong className="text-white">Praia de São Lourenço:</strong> The beach at São Lourenço with a snack bar.</li>
+                      <li><strong className="text-white">Recreational Forest Reserve of Fontinhas:</strong> Beautiful redwood park to hike.</li>
+                      <li><strong className="text-white">Pico Alto:</strong> Hike to the highest point on the island.</li>
+                      <li><strong className="text-white">Vila do Porto:</strong> Walk around the shops and restaurants in the Vila (we love Central Pub!).</li>
+                      <li><strong className="text-white">Praia Formosa:</strong> Beautiful beach with 2 restaurants.</li>
+                      <li><strong className="text-white">Anjos:</strong> Natural pools with a snack bar.</li>
+                      <li><strong className="text-white">Bar do Blues:</strong> Best place to catch the sunset and enjoy a drink!</li>
+                      <li>
+                        <strong className="text-white block">Island Boat Trip:</strong> An amazing experience going through caves and jumping in, recommended by Sean & Molly!
+                        <a 
+                          href="https://mantamaria.com/pt/experiencias" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-pink-400 hover:underline text-[11px] block mt-0.5"
+                        >
+                          mantamaria.com ↗
+                        </a>
+                      </li>
+                    </ul>
                   </div>
                 )}
 
-                {/* TAB 3: FAQ */}
-                {activeGuideTab === 'faq' && (
-                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
-                    <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">❓ FREQUENTLY ASKED QUESTIONS</span>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li><strong className="text-white">Dress Code:</strong> Smart casual / island formal suited for a beachside ceremony.</li>
-                        <li><strong className="text-white">Weather:</strong> August in the Azores is warm and sunny, with ocean breezes.</li>
-                      </ul>
-                    </div>
-                  </div>
-                )}
-
-                {/* TAB 4: MAP */}
+                {/* TAB 5: MAP */}
                 {activeGuideTab === 'map' && (
-                  <div className="space-y-4 sm:space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">MAP LOCATION</span>
-                      <p className="text-gray-300 mb-3">São Lourenço Bay, Santa Maria Island, Azores, Portugal.</p>
+                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">MAP & LOCATIONS</span>
+                      <p className="text-gray-300 mb-2"><strong className="text-white">Ceremony:</strong> Port at the end of São Lourenço Bay</p>
+                      <p className="text-gray-300 mb-3"><strong className="text-white">Reception:</strong> Ponta Negra Restaurante</p>
                       <a
                         href="https://maps.google.com/?q=Baia+de+Sao+Lourenco,+Santa+Maria,+Azores"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-block bg-pink-700 hover:bg-pink-600 text-white font-bold px-3.5 py-2 border border-pink-500 text-xs"
                       >
-                        Open in Google Maps ↗
+                        Open Bay in Google Maps ↗
                       </a>
                     </div>
                   </div>
@@ -790,7 +872,7 @@ export default function WeddingApp() {
             </main>
           </div>
 
-          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR (MOBILE THUMB-OPTIMIZED) */}
+          {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 px-3 py-2.5 sm:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
             <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3">
               <div className="flex items-center gap-3 min-w-0">
