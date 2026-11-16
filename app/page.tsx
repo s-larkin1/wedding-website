@@ -11,6 +11,7 @@ const supabase = createClient(
 export default function WeddingApp() {
   const [hasRSVPd, setHasRSVPd] = useState(false);
   const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
   const [rsvpStatus, setRsvpStatus] = useState('yes');
   const [rsvpNotes, setRsvpNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +36,7 @@ export default function WeddingApp() {
   // Countdown Timer State
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Info Section Tab State (expanded to schedule, travel, dress code, activities, map)
+  // Info Section Tab State
   const [activeGuideTab, setActiveGuideTab] = useState<'schedule' | 'travel' | 'dress' | 'activities' | 'map'>('schedule');
 
   // HTML5 Audio Reference
@@ -276,7 +277,7 @@ export default function WeddingApp() {
     try {
       const { data, error } = await supabase
         .from('rsvps')
-        .insert([{ guest_names: guestName, status: rsvpStatus, notes: rsvpNotes }])
+        .insert([{ guest_names: guestName, email: guestEmail, status: rsvpStatus, notes: rsvpNotes }])
         .select();
 
       if (!error && data && data.length > 0) {
@@ -334,7 +335,7 @@ export default function WeddingApp() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-black text-xs font-mono selection:bg-pink-500 selection:text-white relative overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-gray-100 text-xs font-mono selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
 
       {/* HTML5 Direct Web Audio Player */}
       <audio 
@@ -347,29 +348,29 @@ export default function WeddingApp() {
       {/* TOP NAVIGATION BAR */}
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-between items-start p-2 sm:p-3 pointer-events-none gap-2">
         {/* COUNTDOWN TIMER WIDGET */}
-        <div className="bg-black/90 border border-pink-500/80 px-2.5 py-1.5 sm:p-2 text-gray-200 shadow-lg backdrop-blur-sm pointer-events-auto">
-          <div className="text-[9px] sm:text-[10px] font-bold text-pink-400 uppercase tracking-wider sm:tracking-widest border-b border-gray-800 pb-0.5 mb-1">
+        <div className="bg-white/95 border border-gray-300 px-2.5 py-1.5 sm:p-2 text-gray-800 shadow-md backdrop-blur-sm pointer-events-auto">
+          <div className="text-[9px] sm:text-[10px] font-bold text-blue-900 uppercase tracking-wider sm:tracking-widest border-b border-gray-200 pb-0.5 mb-1">
             ⏳ COUNTDOWN
           </div>
-          <div className="flex gap-1.5 sm:gap-2 text-center text-xs font-bold text-white">
+          <div className="flex gap-1.5 sm:gap-2 text-center text-xs font-bold text-gray-900">
             <div>
-              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{timeLeft.days}</span>
-              <span className="text-[8px] text-gray-400 uppercase">Days</span>
+              <span className="text-blue-700 text-xs sm:text-sm block leading-tight">{timeLeft.days}</span>
+              <span className="text-[8px] text-gray-500 uppercase">Days</span>
             </div>
-            <span className="text-pink-500 font-normal">:</span>
+            <span className="text-gray-400 font-normal">:</span>
             <div>
-              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{String(timeLeft.hours).padStart(2, '0')}</span>
-              <span className="text-[8px] text-gray-400 uppercase">Hrs</span>
+              <span className="text-blue-700 text-xs sm:text-sm block leading-tight">{String(timeLeft.hours).padStart(2, '0')}</span>
+              <span className="text-[8px] text-gray-500 uppercase">Hrs</span>
             </div>
-            <span className="text-pink-500 font-normal">:</span>
+            <span className="text-gray-400 font-normal">:</span>
             <div>
-              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{String(timeLeft.minutes).padStart(2, '0')}</span>
-              <span className="text-[8px] text-gray-400 uppercase">Min</span>
+              <span className="text-blue-700 text-xs sm:text-sm block leading-tight">{String(timeLeft.minutes).padStart(2, '0')}</span>
+              <span className="text-[8px] text-gray-500 uppercase">Min</span>
             </div>
-            <span className="text-pink-500 font-normal">:</span>
+            <span className="text-gray-400 font-normal">:</span>
             <div>
-              <span className="text-yellow-400 text-xs sm:text-sm block leading-tight">{String(timeLeft.seconds).padStart(2, '0')}</span>
-              <span className="text-[8px] text-gray-400 uppercase">Sec</span>
+              <span className="text-blue-700 text-xs sm:text-sm block leading-tight">{String(timeLeft.seconds).padStart(2, '0')}</span>
+              <span className="text-[8px] text-gray-500 uppercase">Sec</span>
             </div>
           </div>
         </div>
@@ -379,7 +380,7 @@ export default function WeddingApp() {
           <button
             type="button"
             onClick={() => setIsAdminOpen(!isAdminOpen)}
-            className="bg-gray-900/95 hover:bg-pink-900 active:bg-pink-800 text-pink-400 font-bold border border-pink-500 px-3 py-2 sm:py-1.5 shadow-lg cursor-pointer min-h-[38px]"
+            className="bg-white hover:bg-gray-50 active:bg-gray-100 text-blue-900 font-bold border border-gray-300 px-3 py-2 sm:py-1.5 shadow-md cursor-pointer min-h-[38px]"
           >
             {isAdminOpen ? '✕ Close' : '🔑 Admin'}
           </button>
@@ -388,16 +389,16 @@ export default function WeddingApp() {
 
       {/* ADMIN MODAL OVERLAY */}
       {isAdminOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-3 bg-black/70 backdrop-blur-xs pointer-events-auto">
-          <div className="w-full max-w-md bg-gray-950 border-2 border-pink-500 shadow-2xl p-4 text-gray-200 text-xs">
-            <div className="bg-gradient-to-r from-pink-900 to-purple-900 text-white p-2 font-bold mb-3 flex justify-between items-center border border-pink-500">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-3 bg-black/50 backdrop-blur-xs pointer-events-auto">
+          <div className="w-full max-w-md bg-white border-2 border-gray-300 shadow-2xl p-4 text-gray-800 text-xs">
+            <div className="bg-blue-900 text-white p-2 font-bold mb-3 flex justify-between items-center border border-blue-900">
               <span>ADMIN DASHBOARD</span>
               <div className="flex items-center gap-2">
                 {isAdminAuthenticated && (
                   <button 
                     type="button"
                     onClick={() => setIsAdminAuthenticated(false)}
-                    className="text-[10px] bg-red-800 hover:bg-red-700 px-2 py-1 border border-red-500 cursor-pointer"
+                    className="text-[10px] bg-red-700 hover:bg-red-600 px-2 py-1 border border-red-500 text-white cursor-pointer"
                   >
                     Logout
                   </button>
@@ -405,7 +406,7 @@ export default function WeddingApp() {
                 <button
                   type="button"
                   onClick={() => setIsAdminOpen(false)}
-                  className="text-[10px] bg-gray-800 hover:bg-gray-700 px-2 py-1 border border-gray-500 cursor-pointer"
+                  className="text-[10px] bg-gray-200 hover:bg-gray-300 px-2 py-1 border border-gray-400 text-gray-800 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -414,33 +415,33 @@ export default function WeddingApp() {
 
             {!isAdminAuthenticated ? (
               <form onSubmit={handleAdminAuth} className="space-y-3">
-                <p className="text-gray-400">Enter admin password to manage site data:</p>
+                <p className="text-gray-600">Enter admin password to manage site data:</p>
                 <div>
                   <input
                     type="password"
                     placeholder="Password"
                     value={adminPasswordInput}
                     onChange={(e) => setAdminPasswordInput(e.target.value)}
-                    className="w-full bg-black border border-gray-700 p-2.5 text-base text-white focus:border-pink-500 focus:outline-none"
+                    className="w-full bg-white border border-gray-400 p-2.5 text-base text-gray-900 focus:border-blue-700 focus:outline-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-pink-700 hover:bg-pink-600 text-white font-bold p-2.5 border border-pink-500 cursor-pointer text-sm"
+                  className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-2.5 border border-blue-900 cursor-pointer text-sm"
                 >
                   Unlock Dashboard
                 </button>
               </form>
             ) : (
               <div>
-                <div className="flex border-b border-gray-800 mb-3 gap-2">
+                <div className="flex border-b border-gray-200 mb-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setAdminTab('rsvps')}
                     className={`pb-1.5 px-2 font-bold border-b-2 cursor-pointer text-xs ${
                       adminTab === 'rsvps'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     RSVPs ({rsvpsList.length})
@@ -450,8 +451,8 @@ export default function WeddingApp() {
                     onClick={() => setAdminTab('songs')}
                     className={`pb-1.5 px-2 font-bold border-b-2 cursor-pointer text-xs ${
                       adminTab === 'songs'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     Songs ({requestedSongs.length})
@@ -465,14 +466,15 @@ export default function WeddingApp() {
                       <p className="text-gray-500 italic">No RSVPs recorded yet.</p>
                     ) : (
                       rsvpsList.map((item) => (
-                        <div key={item.id} className="bg-black p-2.5 border border-gray-800 flex justify-between items-start gap-2">
+                        <div key={item.id} className="bg-gray-50 p-2.5 border border-gray-200 flex justify-between items-start gap-2">
                           <div className="min-w-0">
-                            <div className="font-bold text-white break-words">{item.guest_names}</div>
-                            <div className="text-[11px] text-gray-400">
-                              Status: <span className="uppercase text-yellow-400">{item.status}</span>
+                            <div className="font-bold text-gray-900 break-words">{item.guest_names}</div>
+                            {item.email && <div className="text-[11px] text-blue-700 break-all">{item.email}</div>}
+                            <div className="text-[11px] text-gray-600">
+                              Status: <span className="uppercase text-blue-800 font-semibold">{item.status}</span>
                             </div>
                             {item.notes && (
-                              <div className="text-[11px] text-pink-300/80 mt-1 italic break-words">
+                              <div className="text-[11px] text-gray-700 mt-1 italic break-words">
                                 "{item.notes}"
                               </div>
                             )}
@@ -480,7 +482,7 @@ export default function WeddingApp() {
                           <button
                             type="button"
                             onClick={() => handleDeleteRSVP(item.id)}
-                            className="bg-red-900/80 hover:bg-red-700 text-white text-[11px] px-2.5 py-1.5 border border-red-500 cursor-pointer shrink-0"
+                            className="bg-red-700 hover:bg-red-600 text-white text-[11px] px-2.5 py-1.5 border border-red-500 cursor-pointer shrink-0"
                           >
                             Delete
                           </button>
@@ -497,16 +499,16 @@ export default function WeddingApp() {
                       <p className="text-gray-500 italic">No song requests recorded yet.</p>
                     ) : (
                       requestedSongs.map((song) => (
-                        <div key={song.id} className="bg-black p-2.5 border border-gray-800 flex justify-between items-center gap-2">
+                        <div key={song.id} className="bg-gray-50 p-2.5 border border-gray-200 flex justify-between items-center gap-2">
                           <div className="min-w-0 flex-1">
-                            <div className="font-bold text-pink-400 truncate">{song.song_title}</div>
-                            <div className="text-[11px] text-gray-400 truncate">{song.artist}</div>
-                            <div className="text-[10px] text-gray-600 truncate">By: {song.requested_by || 'Anon'}</div>
+                            <div className="font-bold text-blue-900 truncate">{song.song_title}</div>
+                            <div className="text-[11px] text-gray-700 truncate">{song.artist}</div>
+                            <div className="text-[10px] text-gray-500 truncate">By: {song.requested_by || 'Anon'}</div>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleDeleteSong(song.id)}
-                            className="bg-red-900/80 hover:bg-red-700 text-white text-[11px] px-2.5 py-1.5 border border-red-500 cursor-pointer shrink-0"
+                            className="bg-red-700 hover:bg-red-600 text-white text-[11px] px-2.5 py-1.5 border border-red-500 cursor-pointer shrink-0"
                           >
                             Delete
                           </button>
@@ -525,7 +527,7 @@ export default function WeddingApp() {
       {!hasRSVPd ? (
         <div 
           className="relative min-h-[100dvh] w-full flex flex-col justify-end sm:justify-center items-center bg-cover bg-center pt-20 pb-6 sm:py-12 px-3 pointer-events-auto"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2)), url('/saolaurenco.jpg')` }}
+          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2)), url('/saolaurenco.jpg')` }}
         >
           <div className="bg-gray-200 border-2 border-gray-400 p-4 sm:p-6 max-w-lg w-full shadow-2xl text-black">
             <div className="bg-blue-900 text-white font-bold px-3 py-2 mb-4 flex justify-between items-center text-sm sm:text-base gap-2">
@@ -546,9 +548,20 @@ export default function WeddingApp() {
               </div>
 
               <div>
+                <label className="block mb-1 font-bold text-sm">Email Address:</label>
+                <input 
+                  type="email" 
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="e.g. john@example.com"
+                  className="w-full p-2.5 border-2 border-gray-600 text-black bg-white focus:outline-none text-base"
+                />
+              </div>
+
+              <div>
                 <label className="block mb-1 font-bold text-sm">Attending?</label>
-                <div className="grid grid-cols-3 gap-2 bg-white p-2 border border-gray-400 text-sm">
-                  {['yes', 'no', 'maybe'].map((val) => (
+                <div className="grid grid-cols-2 gap-2 bg-white p-2 border border-gray-400 text-sm">
+                  {['yes', 'no'].map((val) => (
                     <label
                       key={val}
                       className={`capitalize flex items-center justify-center gap-1.5 py-1.5 px-2 cursor-pointer font-semibold border ${
@@ -563,7 +576,7 @@ export default function WeddingApp() {
                         onChange={(e) => setRsvpStatus(e.target.value)}
                         className="w-4 h-4"
                       />
-                      {val}
+                      {val === 'yes' ? 'Joyfully Accept' : 'Regretfully Decline'}
                     </label>
                   ))}
                 </div>
@@ -603,7 +616,7 @@ export default function WeddingApp() {
         </div>
       ) : (
 
-        /* PAGE 2: MAIN HUB WITH SLIDESHOW & GUIDES */
+        /* PAGE 2: MAIN HUB WITH SLIDESHOW & GUIDES (LIGHT THEME) */
         <>
           {/* BACKGROUND SLIDESHOW */}
           <div className="fixed inset-0 z-0 pointer-events-none">
@@ -617,46 +630,46 @@ export default function WeddingApp() {
                 }}
               />
             ))}
-            <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px]" />
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-200 pointer-events-auto">
-            <header className="border-2 border-pink-500 bg-black/85 p-4 sm:p-6 mb-5 sm:mb-6 text-center shadow-lg">
-              <h1 className="text-xl sm:text-3xl font-bold text-pink-400 tracking-wide sm:tracking-wider leading-snug">
+          <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-800 pointer-events-auto">
+            <header className="border-2 border-blue-900 bg-white/95 p-4 sm:p-6 mb-5 sm:mb-6 text-center shadow-lg">
+              <h1 className="text-xl sm:text-3xl font-bold text-blue-900 tracking-wide sm:tracking-wider leading-snug">
                 Molly & Sean's Wedding Celebration
               </h1>
-              <p className="text-gray-300 mt-1.5 text-xs sm:text-sm leading-relaxed">
+              <p className="text-gray-600 mt-1.5 text-xs sm:text-sm leading-relaxed">
                 August 4th, 2027 in beautiful São Lourenço Bay, Santa Maria, Azores
               </p>
             </header>
 
             <main className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
               {/* SONG REQUEST CARD */}
-              <div className="border border-pink-500/50 bg-black/85 p-4 sm:p-6 shadow-xl flex flex-col justify-between">
+              <div className="border border-gray-300 bg-white/95 p-4 sm:p-6 shadow-xl flex flex-col justify-between">
                 <div>
-                  <h2 className="text-sm sm:text-base font-bold text-yellow-400 uppercase tracking-widest border-b border-gray-800 pb-2 mb-4">
+                  <h2 className="text-sm sm:text-base font-bold text-blue-900 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">
                     » Add a Song Request
                   </h2>
 
                   <div className="space-y-3.5 sm:space-y-4">
                     <div>
-                      <label className="block text-gray-300 mb-1.5 text-sm font-semibold">Song Title:</label>
+                      <label className="block text-gray-700 mb-1.5 text-sm font-semibold">Song Title:</label>
                       <input 
                         type="text" 
                         value={songTitle}
                         onChange={(e) => setSongTitle(e.target.value)}
                         placeholder="e.g. Dancing Queen"
-                        className="w-full bg-black/90 border border-gray-700 p-2.5 text-white focus:border-pink-500 focus:outline-none text-base"
+                        className="w-full bg-white border border-gray-400 p-2.5 text-gray-900 focus:border-blue-700 focus:outline-none text-base"
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 mb-1.5 text-sm font-semibold">Artist:</label>
+                      <label className="block text-gray-700 mb-1.5 text-sm font-semibold">Artist:</label>
                       <input 
                         type="text" 
                         value={artist}
                         onChange={(e) => setArtist(e.target.value)}
                         placeholder="e.g. ABBA"
-                        className="w-full bg-black/90 border border-gray-700 p-2.5 text-white focus:border-pink-500 focus:outline-none text-base"
+                        className="w-full bg-white border border-gray-400 p-2.5 text-gray-900 focus:border-blue-700 focus:outline-none text-base"
                       />
                     </div>
                   </div>
@@ -665,22 +678,22 @@ export default function WeddingApp() {
                 <button 
                   type="button" 
                   onClick={handleSongSubmit}
-                  className="w-full bg-pink-700 hover:bg-pink-600 active:bg-pink-500 text-white font-bold px-4 py-3 border border-pink-500 mt-5 sm:mt-6 cursor-pointer text-sm min-h-[46px]"
+                  className="w-full bg-blue-900 hover:bg-blue-800 active:bg-blue-700 text-white font-bold px-4 py-3 border border-blue-900 mt-5 sm:mt-6 cursor-pointer text-sm min-h-[46px]"
                 >
                   + Add Track to Playlist
                 </button>
               </div>
 
               {/* WEDDING DETAILS & GUIDE CARD */}
-              <div className="border border-pink-500/50 bg-black/85 p-4 sm:p-6 shadow-xl flex flex-col">
-                <div className="grid grid-cols-5 border-b border-gray-800 mb-4 gap-0.5 pb-1">
+              <div className="border border-gray-300 bg-white/95 p-4 sm:p-6 shadow-xl flex flex-col">
+                <div className="grid grid-cols-5 border-b border-gray-200 mb-4 gap-0.5 pb-1">
                   <button
                     type="button"
                     onClick={() => setActiveGuideTab('schedule')}
                     className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'schedule'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     📅 Schedule
@@ -690,8 +703,8 @@ export default function WeddingApp() {
                     onClick={() => setActiveGuideTab('travel')}
                     className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'travel'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     ✈️ Stay
@@ -701,8 +714,8 @@ export default function WeddingApp() {
                     onClick={() => setActiveGuideTab('dress')}
                     className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'dress'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     👗 Attire
@@ -712,8 +725,8 @@ export default function WeddingApp() {
                     onClick={() => setActiveGuideTab('activities')}
                     className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'activities'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     🌋 Do
@@ -723,8 +736,8 @@ export default function WeddingApp() {
                     onClick={() => setActiveGuideTab('map')}
                     className={`py-2 px-0.5 font-bold border-b-2 cursor-pointer text-[10px] sm:text-xs uppercase text-center truncate ${
                       activeGuideTab === 'map'
-                        ? 'border-pink-500 text-pink-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
+                        ? 'border-blue-900 text-blue-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     🗺️ Map
@@ -733,26 +746,26 @@ export default function WeddingApp() {
 
                 {/* TAB 1: SCHEDULE & EVENTS */}
                 {activeGuideTab === 'schedule' && (
-                  <div className="space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-1">August 3, 2027</span>
-                      <p className="text-white font-semibold">Welcome Party</p>
+                      <span className="text-blue-900 font-bold block mb-1">August 3, 2027</span>
+                      <p className="text-gray-900 font-semibold">Welcome Party</p>
                     </div>
 
-                    <div className="pt-3 border-t border-gray-800">
-                      <span className="text-yellow-400 font-bold block mb-1">August 4, 2027</span>
+                    <div className="pt-3 border-t border-gray-200">
+                      <span className="text-blue-900 font-bold block mb-1">August 4, 2027</span>
                       
                       <div className="space-y-3 mt-2">
                         <div>
-                          <strong className="text-pink-400 block">Ceremony (5:00 PM)</strong>
-                          <p className="text-gray-300">Port at the end of São Lourenço Bay.</p>
-                          <p className="text-gray-400 text-[11px] mt-0.5">Transportation will be provided for those staying at the hotel.</p>
+                          <strong className="text-blue-800 block">Ceremony (5:00 PM)</strong>
+                          <p className="text-gray-700">Port at the end of São Lourenço Bay.</p>
+                          <p className="text-gray-500 text-[11px] mt-0.5">Transportation will be provided for those staying at the hotel.</p>
                         </div>
 
                         <div>
-                          <strong className="text-pink-400 block">Cocktail Hour & Reception (6:00 PM - 2:00 AM)</strong>
-                          <p className="text-gray-300">Ponta Negra Restaurante.</p>
-                          <p className="text-gray-400 text-[11px] mt-0.5">Drinks, dinner, and dancing all night!</p>
+                          <strong className="text-blue-800 block">Cocktail Hour & Reception (6:00 PM - 2:00 AM)</strong>
+                          <p className="text-gray-700">Ponta Negra Restaurante.</p>
+                          <p className="text-gray-500 text-[11px] mt-0.5">Drinks, dinner, and dancing all night!</p>
                         </div>
                       </div>
                     </div>
@@ -761,35 +774,35 @@ export default function WeddingApp() {
 
                 {/* TAB 2: ACCOMMODATIONS & TRAVEL */}
                 {activeGuideTab === 'travel' && (
-                  <div className="space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">🏠 ACCOMMODATIONS</span>
-                      <ul className="space-y-3 text-gray-300">
+                      <span className="text-blue-900 font-bold block mb-2 text-sm sm:text-base">🏠 ACCOMMODATIONS</span>
+                      <ul className="space-y-3 text-gray-700">
                         <li>
-                          <strong className="text-white block">Hotel Colombo</strong>
+                          <strong className="text-gray-900 block">Hotel Colombo</strong>
                           <a 
                             href="https://www.guestreservations.com/hotel-colombo-vila-do-porto/booking" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-pink-400 hover:underline text-[11px] break-all block mt-0.5"
+                            className="text-blue-700 hover:underline text-[11px] break-all block mt-0.5"
                           >
                             View Booking Options ↗
                           </a>
                         </li>
                         <li>
-                          <strong className="text-white block">Hotel Santa Maria</strong>
+                          <strong className="text-gray-900 block">Hotel Santa Maria</strong>
                           <a 
                             href="https://www.hotel-santamaria.pt/" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-pink-400 hover:underline text-[11px] break-all block mt-0.5"
+                            className="text-blue-700 hover:underline text-[11px] break-all block mt-0.5"
                           >
                             hotel-santamaria.pt ↗
                           </a>
                         </li>
                         <li>
-                          <strong className="text-white block">Airbnb</strong>
-                          <p className="text-gray-400 text-[11px]">Great for private rental house options across the island.</p>
+                          <strong className="text-gray-900 block">Airbnb</strong>
+                          <p className="text-gray-500 text-[11px]">Great for private rental house options across the island.</p>
                         </li>
                       </ul>
                     </div>
@@ -798,24 +811,24 @@ export default function WeddingApp() {
 
                 {/* TAB 3: DRESS CODE */}
                 {activeGuideTab === 'dress' && (
-                  <div className="space-y-3 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-3 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-1 text-base">👗 ISLAND COCKTAIL</span>
-                      <p className="italic text-pink-300 mb-3">We want you to look your best while staying comfortable in the island breeze!</p>
+                      <span className="text-blue-900 font-bold block mb-1 text-base">👗 ISLAND COCKTAIL</span>
+                      <p className="italic text-blue-800 mb-3">We want you to look your best while staying comfortable in the island breeze!</p>
                     </div>
 
-                    <div className="space-y-2 text-gray-300">
+                    <div className="space-y-2 text-gray-700">
                       <div>
-                        <strong className="text-white block">For the gentlemen:</strong>
-                        <p className="text-[11px] text-gray-400">Think breathable and relaxed. Light button-ups paired with linen pants or chinos are perfect. Suits and ties are completely optional—we want you to be comfortable!</p>
+                        <strong className="text-gray-900 block">For the gentlemen:</strong>
+                        <p className="text-[11px] text-gray-600">Think breathable and relaxed. Light button-ups paired with linen pants or chinos are perfect. Suits and ties are completely optional—we want you to be comfortable!</p>
                       </div>
 
                       <div>
-                        <strong className="text-white block">For the ladies:</strong>
-                        <p className="text-[11px] text-gray-400">We would love to see you in cocktail-style beachy dresses. Think flowy midis, vibrant colors, or fun tropical prints.</p>
+                        <strong className="text-gray-900 block">For the ladies:</strong>
+                        <p className="text-[11px] text-gray-600">We would love to see you in cocktail-style beachy dresses. Think flowy midis, vibrant colors, or fun tropical prints.</p>
                       </div>
 
-                      <div className="pt-2 border-t border-gray-800 text-yellow-300/90 text-[11px]">
+                      <div className="pt-2 border-t border-gray-200 text-blue-900 text-[11px]">
                         💡 We won’t be on the sand (unless you want a photo on the beach!), so wear whatever shoes are most comfortable for you.
                       </div>
                     </div>
@@ -824,24 +837,24 @@ export default function WeddingApp() {
 
                 {/* TAB 4: THINGS TO DO */}
                 {activeGuideTab === 'activities' && (
-                  <div className="space-y-3 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
-                    <span className="text-yellow-400 font-bold block mb-1 text-sm sm:text-base">🌋 THINGS TO DO IN SANTA MARIA</span>
-                    <ul className="space-y-2.5 text-gray-300">
-                      <li><strong className="text-white">Miradouro do Tagarete:</strong> Viewpoint of the whole island with a swing.</li>
-                      <li><strong className="text-white">Praia de São Lourenço:</strong> The beach at São Lourenço with a snack bar.</li>
-                      <li><strong className="text-white">Recreational Forest Reserve of Fontinhas:</strong> Beautiful redwood park to hike.</li>
-                      <li><strong className="text-white">Pico Alto:</strong> Hike to the highest point on the island.</li>
-                      <li><strong className="text-white">Vila do Porto:</strong> Walk around the shops and restaurants in the Vila (we love Central Pub!).</li>
-                      <li><strong className="text-white">Praia Formosa:</strong> Beautiful beach with 2 restaurants.</li>
-                      <li><strong className="text-white">Anjos:</strong> Natural pools with a snack bar.</li>
-                      <li><strong className="text-white">Bar do Blues:</strong> Best place to catch the sunset and enjoy a drink!</li>
+                  <div className="space-y-3 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                    <span className="text-blue-900 font-bold block mb-1 text-sm sm:text-base">🌋 THINGS TO DO IN SANTA MARIA</span>
+                    <ul className="space-y-2.5 text-gray-700">
+                      <li><strong className="text-gray-900">Miradouro do Tagarete:</strong> Viewpoint of the whole island with a swing.</li>
+                      <li><strong className="text-gray-900">Praia de São Lourenço:</strong> The beach at São Lourenço with a snack bar.</li>
+                      <li><strong className="text-gray-900">Recreational Forest Reserve of Fontinhas:</strong> Beautiful redwood park to hike.</li>
+                      <li><strong className="text-gray-900">Pico Alto:</strong> Hike to the highest point on the island.</li>
+                      <li><strong className="text-gray-900">Vila do Porto:</strong> Walk around the shops and restaurants in the Vila (we love Central Pub!).</li>
+                      <li><strong className="text-gray-900">Praia Formosa:</strong> Beautiful beach with 2 restaurants.</li>
+                      <li><strong className="text-gray-900">Anjos:</strong> Natural pools with a snack bar.</li>
+                      <li><strong className="text-gray-900">Bar do Blues:</strong> Best place to catch the sunset and enjoy a drink!</li>
                       <li>
-                        <strong className="text-white block">Island Boat Trip:</strong> An amazing experience going through caves and jumping in, recommended by Sean & Molly!
+                        <strong className="text-gray-900 block">Island Boat Trip:</strong> An amazing experience going through caves and jumping in, recommended by Sean & Molly!
                         <a 
                           href="https://mantamaria.com/pt/experiencias" 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-pink-400 hover:underline text-[11px] block mt-0.5"
+                          className="text-blue-700 hover:underline text-[11px] block mt-0.5"
                         >
                           mantamaria.com ↗
                         </a>
@@ -852,16 +865,16 @@ export default function WeddingApp() {
 
                 {/* TAB 5: MAP */}
                 {activeGuideTab === 'map' && (
-                  <div className="space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
-                      <span className="text-yellow-400 font-bold block mb-2 text-sm sm:text-base">MAP & LOCATIONS</span>
-                      <p className="text-gray-300 mb-2"><strong className="text-white">Ceremony:</strong> Port at the end of São Lourenço Bay</p>
-                      <p className="text-gray-300 mb-3"><strong className="text-white">Reception:</strong> Ponta Negra Restaurante</p>
+                      <span className="text-blue-900 font-bold block mb-2 text-sm sm:text-base">MAP & LOCATIONS</span>
+                      <p className="text-gray-700 mb-2"><strong className="text-gray-900">Ceremony:</strong> Port at the end of São Lourenço Bay</p>
+                      <p className="text-gray-700 mb-3"><strong className="text-gray-900">Reception:</strong> Ponta Negra Restaurante</p>
                       <a
                         href="https://maps.google.com/?q=Baia+de+Sao+Lourenco,+Santa+Maria,+Azores"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block bg-pink-700 hover:bg-pink-600 text-white font-bold px-3.5 py-2 border border-pink-500 text-xs"
+                        className="inline-block bg-blue-900 hover:bg-blue-800 text-white font-bold px-3.5 py-2 border border-blue-900 text-xs"
                       >
                         Open Bay in Google Maps ↗
                       </a>
@@ -873,22 +886,22 @@ export default function WeddingApp() {
           </div>
 
           {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t-2 border-pink-500 px-3 py-2.5 sm:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t-2 border-blue-900 px-3 py-2.5 sm:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
             <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
                   onClick={togglePlayPause}
-                  className="bg-pink-700 hover:bg-pink-600 active:bg-pink-500 text-white font-bold px-3.5 py-2.5 border border-pink-500 cursor-pointer shrink-0 text-xs flex items-center justify-center min-h-[42px] min-w-[84px]"
+                  className="bg-blue-900 hover:bg-blue-800 active:bg-blue-700 text-white font-bold px-3.5 py-2.5 border border-blue-900 cursor-pointer shrink-0 text-xs flex items-center justify-center min-h-[42px] min-w-[84px]"
                 >
                   {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
                 </button>
 
                 <div className="min-w-0 flex-1">
-                  <div className="text-pink-400 font-bold text-sm truncate">
+                  <div className="text-blue-900 font-bold text-sm truncate">
                     {currentSong ? currentSong.song_title : 'No track selected'}
                   </div>
-                  <div className="text-gray-400 text-xs truncate">
+                  <div className="text-gray-600 text-xs truncate">
                     {currentSong ? `By ${currentSong.artist}` : 'Add a track above!'}
                   </div>
                 </div>
@@ -900,8 +913,8 @@ export default function WeddingApp() {
                   onClick={handleShuffleClick}
                   className={`px-3 py-2 font-bold border text-xs cursor-pointer transition-colors text-center min-h-[38px] ${
                     isShuffle 
-                      ? 'bg-pink-900/80 border-pink-500 text-pink-300' 
-                      : 'bg-gray-900 border-gray-700 text-gray-500 hover:text-gray-300'
+                      ? 'bg-blue-100 border-blue-800 text-blue-900' 
+                      : 'bg-gray-100 border-gray-300 text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   🔀 Shuffle: {isShuffle ? 'ON' : 'OFF'}
@@ -909,7 +922,7 @@ export default function WeddingApp() {
                 <button
                   type="button"
                   onClick={handleNextSong}
-                  className="bg-gray-900 hover:bg-gray-800 active:bg-gray-700 border border-gray-700 text-gray-300 px-3 py-2 font-bold text-xs cursor-pointer text-center min-h-[38px]"
+                  className="bg-gray-100 hover:bg-gray-200 active:bg-gray-300 border border-gray-300 text-gray-800 px-3 py-2 font-bold text-xs cursor-pointer text-center min-h-[38px]"
                 >
                   NEXT ⏭
                 </button>
