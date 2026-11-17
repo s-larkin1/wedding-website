@@ -576,7 +576,7 @@ export default function WeddingApp() {
                         onChange={(e) => setRsvpStatus(e.target.value)}
                         className="w-4 h-4"
                       />
-                      {val === 'yes' ? 'Joyfully Accept' : 'Regretfully Decline'}
+                      {val}
                     </label>
                   ))}
                 </div>
@@ -618,7 +618,7 @@ export default function WeddingApp() {
 
         /* PAGE 2: MAIN HUB WITH SLIDESHOW & GUIDES (LIGHT THEME) */
         <>
-          {/* BACKGROUND SLIDESHOW */}
+          {/* BACKGROUND SLIDESHOW WITH IMPROVED MOBILE CONTRAST OVERLAY */}
           <div className="fixed inset-0 z-0 pointer-events-none">
             {slideshowImages.map((img, index) => (
               <div
@@ -630,7 +630,7 @@ export default function WeddingApp() {
                 }}
               />
             ))}
-            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-white/85 sm:bg-white/75 backdrop-blur-[2px]" />
           </div>
 
           <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-800 pointer-events-auto">
@@ -638,9 +638,6 @@ export default function WeddingApp() {
               <h1 className="text-xl sm:text-3xl font-bold text-blue-900 tracking-wide sm:tracking-wider leading-snug">
                 Molly & Sean's Wedding Celebration
               </h1>
-              <p className="text-gray-600 mt-1.5 text-xs sm:text-sm leading-relaxed">
-                August 4th, 2027 in beautiful São Lourenço Bay, Santa Maria, Azores
-              </p>
             </header>
 
             <main className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
@@ -749,7 +746,7 @@ export default function WeddingApp() {
                   <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
                     <div>
                       <span className="text-blue-900 font-bold block mb-1">August 3, 2027</span>
-                      <p className="text-gray-900 font-semibold">Welcome Party</p>
+                      <p className="text-gray-900 font-semibold">Welcome Party & Sean's Birthday</p>
                     </div>
 
                     <div className="pt-3 border-t border-gray-200">
@@ -801,8 +798,26 @@ export default function WeddingApp() {
                           </a>
                         </li>
                         <li>
+                          <strong className="text-gray-900 block">Booking.com</strong>
+                          <a
+                            href="https://www.booking.com/searchresults.html?ss=Santa+Maria+Island%2C+Azores%2C+Portugal"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-700 hover:underline text-[11px] break-all block mt-0.5"
+                          >
+                            Search Santa Maria Hotels on Booking.com ↗
+                          </a>
+                        </li>
+                        <li>
                           <strong className="text-gray-900 block">Airbnb</strong>
-                          <p className="text-gray-500 text-[11px]">Great for private rental house options across the island.</p>
+                          <a
+                            href="https://www.airbnb.com/s/Santa-Maria--Azores--Portugal/homes"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-700 hover:underline text-[11px] break-all block mt-0.5"
+                          >
+                            Search Rental Houses on Airbnb ↗
+                          </a>
                         </li>
                       </ul>
                     </div>
