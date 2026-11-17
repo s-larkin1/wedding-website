@@ -588,7 +588,7 @@ export default function WeddingApp() {
                   rows={2}
                   value={rsvpNotes}
                   onChange={(e) => setRsvpNotes(e.target.value)}
-                  placeholder="Dietary needs, song ideas, or a note..."
+                  placeholder="Dietary needs, wedding ideas, or a note..."
                   className="w-full p-2.5 border-2 border-gray-600 text-black bg-white focus:outline-none resize-none text-base"
                 />
               </div>
@@ -616,9 +616,9 @@ export default function WeddingApp() {
         </div>
       ) : (
 
-        /* PAGE 2: MAIN HUB WITH SLIDESHOW & GUIDES (LIGHT THEME) */
+        /* PAGE 2: MAIN HUB WITH SLIDESHOW & GUIDES */
         <>
-          {/* BACKGROUND SLIDESHOW WITH IMPROVED MOBILE CONTRAST OVERLAY */}
+          {/* BACKGROUND SLIDESHOW */}
           <div className="fixed inset-0 z-0 pointer-events-none">
             {slideshowImages.map((img, index) => (
               <div
@@ -633,54 +633,14 @@ export default function WeddingApp() {
             <div className="absolute inset-0 bg-white/85 sm:bg-white/75 backdrop-blur-[2px]" />
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-800 pointer-events-auto">
+          <div className="relative z-10 max-w-4xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-44 sm:pb-36 text-gray-800 pointer-events-auto">
             <header className="border-2 border-blue-900 bg-white/95 p-4 sm:p-6 mb-5 sm:mb-6 text-center shadow-lg">
               <h1 className="text-xl sm:text-3xl font-bold text-blue-900 tracking-wide sm:tracking-wider leading-snug">
                 Molly & Sean's Wedding Celebration
               </h1>
             </header>
 
-            <main className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
-              {/* SONG REQUEST CARD */}
-              <div className="border border-gray-300 bg-white/95 p-4 sm:p-6 shadow-xl flex flex-col justify-between">
-                <div>
-                  <h2 className="text-sm sm:text-base font-bold text-blue-900 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">
-                    » Add a Song Request
-                  </h2>
-
-                  <div className="space-y-3.5 sm:space-y-4">
-                    <div>
-                      <label className="block text-gray-700 mb-1.5 text-sm font-semibold">Song Title:</label>
-                      <input 
-                        type="text" 
-                        value={songTitle}
-                        onChange={(e) => setSongTitle(e.target.value)}
-                        placeholder="e.g. Dancing Queen"
-                        className="w-full bg-white border border-gray-400 p-2.5 text-gray-900 focus:border-blue-700 focus:outline-none text-base"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1.5 text-sm font-semibold">Artist:</label>
-                      <input 
-                        type="text" 
-                        value={artist}
-                        onChange={(e) => setArtist(e.target.value)}
-                        placeholder="e.g. ABBA"
-                        className="w-full bg-white border border-gray-400 p-2.5 text-gray-900 focus:border-blue-700 focus:outline-none text-base"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <button 
-                  type="button" 
-                  onClick={handleSongSubmit}
-                  className="w-full bg-blue-900 hover:bg-blue-800 active:bg-blue-700 text-white font-bold px-4 py-3 border border-blue-900 mt-5 sm:mt-6 cursor-pointer text-sm min-h-[46px]"
-                >
-                  + Add Track to Playlist
-                </button>
-              </div>
-
+            <main className="space-y-6">
               {/* WEDDING DETAILS & GUIDE CARD */}
               <div className="border border-gray-300 bg-white/95 p-4 sm:p-6 shadow-xl flex flex-col">
                 <div className="grid grid-cols-5 border-b border-gray-200 mb-4 gap-0.5 pb-1">
@@ -743,7 +703,7 @@ export default function WeddingApp() {
 
                 {/* TAB 1: SCHEDULE & EVENTS */}
                 {activeGuideTab === 'schedule' && (
-                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-1">
                     <div>
                       <span className="text-blue-900 font-bold block mb-1">August 3, 2027</span>
                       <p className="text-gray-900 font-semibold">Welcome Party & Sean's Birthday</p>
@@ -771,7 +731,7 @@ export default function WeddingApp() {
 
                 {/* TAB 2: ACCOMMODATIONS & TRAVEL */}
                 {activeGuideTab === 'travel' && (
-                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-1">
                     <div>
                       <span className="text-blue-900 font-bold block mb-2 text-sm sm:text-base">🏠 ACCOMMODATIONS</span>
                       <ul className="space-y-3 text-gray-700">
@@ -826,7 +786,7 @@ export default function WeddingApp() {
 
                 {/* TAB 3: DRESS CODE */}
                 {activeGuideTab === 'dress' && (
-                  <div className="space-y-3 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-3 text-gray-700 text-xs sm:text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-1">
                     <div>
                       <span className="text-blue-900 font-bold block mb-1 text-base">👗 ISLAND COCKTAIL</span>
                       <p className="italic text-blue-800 mb-3">We want you to look your best while staying comfortable in the island breeze!</p>
@@ -852,17 +812,41 @@ export default function WeddingApp() {
 
                 {/* TAB 4: THINGS TO DO */}
                 {activeGuideTab === 'activities' && (
-                  <div className="space-y-3 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-3 text-gray-700 text-xs sm:text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-1">
                     <span className="text-blue-900 font-bold block mb-1 text-sm sm:text-base">🌋 THINGS TO DO IN SANTA MARIA</span>
                     <ul className="space-y-2.5 text-gray-700">
-                      <li><strong className="text-gray-900">Miradouro do Tagarete:</strong> Viewpoint of the whole island with a swing.</li>
-                      <li><strong className="text-gray-900">Praia de São Lourenço:</strong> The beach at São Lourenço with a snack bar.</li>
-                      <li><strong className="text-gray-900">Recreational Forest Reserve of Fontinhas:</strong> Beautiful redwood park to hike.</li>
-                      <li><strong className="text-gray-900">Pico Alto:</strong> Hike to the highest point on the island.</li>
-                      <li><strong className="text-gray-900">Vila do Porto:</strong> Walk around the shops and restaurants in the Vila (we love Central Pub!).</li>
-                      <li><strong className="text-gray-900">Praia Formosa:</strong> Beautiful beach with 2 restaurants.</li>
-                      <li><strong className="text-gray-900">Anjos:</strong> Natural pools with a snack bar.</li>
-                      <li><strong className="text-gray-900">Bar do Blues:</strong> Best place to catch the sunset and enjoy a drink!</li>
+                      <li>
+                        <strong className="text-gray-900">Miradouro do Tagarete:</strong> Viewpoint of the whole island with a swing.{' '}
+                        <a href="https://maps.google.com/?q=Miradouro+do+Tagarete+Santa+Maria" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Praia de São Lourenço:</strong> The beach at São Lourenço with a snack bar.{' '}
+                        <a href="https://maps.google.com/?q=Praia+de+Sao+Laurenco+Santa+Maria" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Recreational Forest Reserve of Fontinhas:</strong> Beautiful redwood park to hike.{' '}
+                        <a href="https://maps.google.com/?q=Reserva+Recreativa+Forestal+das+Fontinhas+Santa+Maria" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Pico Alto:</strong> Hike to the highest point on the island.{' '}
+                        <a href="https://maps.google.com/?q=Pico+Alto+Santa+Maria+Azores" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Vila do Porto:</strong> Walk around the shops and restaurants in the Vila (we love Central Pub!).{' '}
+                        <a href="https://maps.google.com/?q=Vila+do+Porto+Santa+Maria" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Praia Formosa:</strong> Beautiful beach with 2 restaurants.{' '}
+                        <a href="https://maps.google.com/?q=Praia+Formosa+Santa+Maria+Azores" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Anjos:</strong> Natural pools with a snack bar.{' '}
+                        <a href="https://maps.google.com/?q=Anjos+Santa+Maria+Azores" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
+                      <li>
+                        <strong className="text-gray-900">Bar do Blues:</strong> Best place to catch the sunset and enjoy a drink!{' '}
+                        <a href="https://maps.google.com/?q=Bar+do+Blues+Santa+Maria+Azores" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">Map ↗</a>
+                      </li>
                       <li>
                         <strong className="text-gray-900 block">Island Boat Trip:</strong> An amazing experience going through caves and jumping in, recommended by Sean & Molly!
                         <a 
@@ -880,7 +864,7 @@ export default function WeddingApp() {
 
                 {/* TAB 5: MAP */}
                 {activeGuideTab === 'map' && (
-                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed md:max-h-[420px] md:overflow-y-auto pr-1">
+                  <div className="space-y-4 text-gray-700 text-xs sm:text-sm leading-relaxed max-h-[420px] overflow-y-auto pr-1">
                     <div>
                       <span className="text-blue-900 font-bold block mb-2 text-sm sm:text-base">MAP & LOCATIONS</span>
                       <p className="text-gray-700 mb-2"><strong className="text-gray-900">Ceremony:</strong> Port at the end of São Lourenço Bay</p>
@@ -897,12 +881,52 @@ export default function WeddingApp() {
                   </div>
                 )}
               </div>
+
+              {/* SONG REQUEST CARD (MOVED TO THE BOTTOM) */}
+              <div className="border border-gray-300 bg-white/95 p-4 sm:p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                  <h2 className="text-sm sm:text-base font-bold text-blue-900 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">
+                    » Add a Song Request
+                  </h2>
+
+                  <div className="space-y-3.5 sm:space-y-4">
+                    <div>
+                      <label className="block text-gray-700 mb-1.5 text-sm font-semibold">Song Title:</label>
+                      <input 
+                        type="text" 
+                        value={songTitle}
+                        onChange={(e) => setSongTitle(e.target.value)}
+                        placeholder="e.g. Dancing Queen"
+                        className="w-full bg-white border border-gray-400 p-2.5 text-gray-900 focus:border-blue-700 focus:outline-none text-base"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-1.5 text-sm font-semibold">Artist:</label>
+                      <input 
+                        type="text" 
+                        value={artist}
+                        onChange={(e) => setArtist(e.target.value)}
+                        placeholder="e.g. ABBA"
+                        className="w-full bg-white border border-gray-400 p-2.5 text-gray-900 focus:border-blue-700 focus:outline-none text-base"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  type="button" 
+                  onClick={handleSongSubmit}
+                  className="w-full bg-blue-900 hover:bg-blue-800 active:bg-blue-700 text-white font-bold px-4 py-3 border border-blue-900 mt-5 sm:mt-6 cursor-pointer text-sm min-h-[46px]"
+                >
+                  + Add Track to Playlist
+                </button>
+              </div>
             </main>
           </div>
 
           {/* FLOATING BOTTOM MUSIC PLAYER CONTROL BAR */}
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t-2 border-blue-900 px-3 py-2.5 sm:p-4 shadow-2xl backdrop-blur-md pointer-events-auto">
-            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3">
+            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
